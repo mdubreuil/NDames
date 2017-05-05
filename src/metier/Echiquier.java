@@ -1,6 +1,8 @@
 package metier;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -11,6 +13,8 @@ import java.util.List;
 public class Echiquier {
     private boolean estSolution;
     private List<Dame> dames;
+    private Map<Integer,List<Integer>> listeColonne;
+    private HashMap<Integer,List<Integer>> listeLigne;
     private int nbConflits;
     private int tailleEchiquier;
     private int typeInitialisation; // TODO : replacer par enum
@@ -18,6 +22,8 @@ public class Echiquier {
     public Echiquier(int tailleEchiquier, int typeInitialisation) {
         this.tailleEchiquier = tailleEchiquier;
         this.typeInitialisation = typeInitialisation;
+        this.listeColonne = new HashMap<>();
+        this.listeLigne = new HashMap<>();
     }
     
     public Dame getDame(int x, int y) {
