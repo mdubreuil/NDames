@@ -1,12 +1,15 @@
 
 package metier;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  *
  * @author Mélanie DUBREUIL
  * @author Ophélie EOUZAN
  */
-public interface IEchiquier {
+public interface IEchiquier extends Cloneable {
 
     public void initialisationRandom();
     public void initialisationOptimisee();
@@ -19,4 +22,8 @@ public interface IEchiquier {
     public int calculeConflits();
     
     public void afficherEchiquier();
+    
+    public Map<Dame, List<Dame>> getVoisins();
+    
+    public Echiquier getVoisin(Dame origine, Dame voisine);
 }

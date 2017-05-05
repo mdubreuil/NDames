@@ -3,21 +3,14 @@ package metier;
 /**
  *
  * @author Mélanie DUBREUIL, Ophélie EOUZAN - POLYTECH LYON - 4APP
- * @deprecated 
  */
 
 public class Dame {
-    private int identifiant;
     private int x, y;
 
-    public Dame(int identifiant, int x, int y) {
-        this.identifiant = identifiant;
+    public Dame(int x, int y) {
         this.x = x;
         this.y = y;
-    }
-    
-    public int getIdentifiant() {
-        return identifiant;
     }
 
     public int getX() {

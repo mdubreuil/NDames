@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -175,38 +177,38 @@ public class Echiquier implements IEchiquier {
 
     @Override
     public void initialisationOptimisee() {
-        List<Dame> lDamesInitiale = new ArrayList(); // Deprecated
-        Map<Integer, List<Integer>> lColonne = new HashMap();//this.getListeColonne();
-        Map<Integer, List<Integer>> lLigne = new HashMap();//this.getListeLigne();
-                
-        int nbPair = 2, nbImpair = 1, indiceColonne = 1;
-        
-        // TODO : A optimiser ?
-        while (indiceColonne < tailleEchiquier/2 + 1){
-            Dame d = new Dame(indiceColonne,indiceColonne,nbImpair);
-            lDamesInitiale.add(d);
-            ajoutHashMap(lColonne,lLigne,indiceColonne,nbImpair);
-            nbImpair = nbImpair + 2;
-            indiceColonne++;
-        }
-        
-        while (indiceColonne <= tailleEchiquier){
-            Dame d = new Dame(indiceColonne,indiceColonne,nbPair);
-            lDamesInitiale.add(d);
-            ajoutHashMap(lColonne,lLigne,indiceColonne,nbPair);
-            nbPair = nbPair + 2;
-            indiceColonne++;
-        }
-        
-        if((tailleEchiquier % 2 == 1) && (indiceColonne == tailleEchiquier + 1)){
-            Dame d = new Dame(tailleEchiquier,tailleEchiquier,tailleEchiquier);
-            lDamesInitiale.add(d);
-            ajoutHashMap(lColonne,lLigne,indiceColonne,tailleEchiquier);
-        }
-        
-        this.setListeColonne(lColonne);
-        this.setListeLigne(lLigne);
-        this.setDames(lDamesInitiale);
+//        List<Dame> lDamesInitiale = new ArrayList(); // Deprecated
+//        Map<Integer, List<Integer>> lColonne = new HashMap();//this.getListeColonne();
+//        Map<Integer, List<Integer>> lLigne = new HashMap();//this.getListeLigne();
+//                
+//        int nbPair = 2, nbImpair = 1, indiceColonne = 1;
+//        
+//        // TODO : A optimiser ?
+//        while (indiceColonne < tailleEchiquier/2 + 1){
+//            Dame d = new Dame(indiceColonne,indiceColonne,nbImpair);
+//            lDamesInitiale.add(d);
+//            ajoutHashMap(lColonne,lLigne,indiceColonne,nbImpair);
+//            nbImpair = nbImpair + 2;
+//            indiceColonne++;
+//        }
+//        
+//        while (indiceColonne <= tailleEchiquier){
+//            Dame d = new Dame(indiceColonne,indiceColonne,nbPair);
+//            lDamesInitiale.add(d);
+//            ajoutHashMap(lColonne,lLigne,indiceColonne,nbPair);
+//            nbPair = nbPair + 2;
+//            indiceColonne++;
+//        }
+//        
+//        if((tailleEchiquier % 2 == 1) && (indiceColonne == tailleEchiquier + 1)){
+//            Dame d = new Dame(tailleEchiquier,tailleEchiquier,tailleEchiquier);
+//            lDamesInitiale.add(d);
+//            ajoutHashMap(lColonne,lLigne,indiceColonne,tailleEchiquier);
+//        }
+//        
+//        this.setListeColonne(lColonne);
+//        this.setListeLigne(lLigne);
+//        this.setDames(lDamesInitiale);
     }
 
     @Override
@@ -239,5 +241,58 @@ public class Echiquier implements IEchiquier {
             }
             System.out.println("\n   ---------------------------------");
         }
+    }
+
+    @Override
+    public Map<Dame, List<Dame>> getVoisins()
+    {
+        Map<Dame, List<Dame>> voisins = new HashMap();
+        
+        for (Map.Entry<Integer, List<Integer>> entry : listeColonne.entrySet()) {
+            if (entry.getValue().size() > 0) {
+                int colonne = entry.getKey();
+                for (Integer ligne : entry.getValue()) {
+                    // Dame (colonne, ligne)
+                    Dame dame = new Dame(ligne, colonne);
+                    
+                    List<Dame> voisinesDame = new ArrayList();
+                    
+                    for (int x = ligne - 1; x > 0 && x < ligne + 1 && x < tailleEchiquier; x++) {
+                        for (int y = colonne - 1; y > 0 && y < colonne + 1 && y < tailleEchiquier; y++) {
+                            voisinesDame.add(new Dame(x, y));
+                        }
+                    }
+                    
+                    voisins.put(dame, voisinesDame);
+                }
+            }
+        }
+        
+        return voisins;
+    }
+
+    @Override
+    public Echiquier getVoisin(Dame origine, Dame voisine) {
+        try {
+            Echiquier voisin = (Echiquier) this.clone();
+            Integer ligneOrigine = (Integer) origine.getX();
+            Integer colonneOrigine = (Integer) origine.getY();
+            Integer ligneVoisin = (Integer) voisine.getX();
+            Integer colonneVoisin = (Integer) voisine.getY();
+            
+            // Remove origine
+            voisin.listeColonne.get(colonneOrigine).remove(ligneOrigine);
+            voisin.listeLigne.get(ligneOrigine).remove(colonneOrigine);
+
+            // Add voisine
+            voisin.listeColonne.get(colonneVoisin).add(ligneVoisin);
+            voisin.listeLigne.getOrDefault(ligneVoisin, new ArrayList()).add(colonneVoisin);
+
+            return voisin;
+        } catch (CloneNotSupportedException ex) {
+            Logger.getLogger(Echiquier.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return null;
     }
 }
