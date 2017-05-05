@@ -7,9 +7,7 @@ package algo;
  */
 
 public class Tabou extends Optimisation {
-
-    public Tabou(int decalageVoisin, int directionsVoisin) {
-        super(decalageVoisin, directionsVoisin);
+    public Tabou(int taillePlateau, int typeInitialisation, int decalageVoisin, int directionsVoisin) {
+        super(taillePlateau, typeInitialisation, decalageVoisin, directionsVoisin);
     }
-    
 }

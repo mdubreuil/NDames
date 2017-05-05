@@ -11,8 +11,12 @@ import algo.Tabou;
 
 public class TestTabou {
     public static void main(String[] args){
-        Optimisation opti = new Tabou(1, 1);
-        opti.initialisationPlateau(1, 9);
+        int tailleEquichier = 8;
+        int decalageVoisinnage = 1;
+        int directionVoisinnage = 1; // Correspond aux 8 directions environnantes
+        int typeInitialisation = 1; // Initialisation opti = 1 ; Initialisation random = 2 ;
+        
+        Optimisation opti = new Tabou(tailleEquichier, typeInitialisation, decalageVoisinnage, directionVoisinnage);
         opti.afficherEchiquier(9);
     }
 }

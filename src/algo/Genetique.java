@@ -6,9 +6,7 @@ package algo;
  * 
  */
 public class Genetique extends Optimisation {
-
-    public Genetique(int decalageVoisin, int directionsVoisin) {
-        super(decalageVoisin, directionsVoisin);
+    public Genetique(int taillePlateau, int typeInitialisation, int decalageVoisin, int directionsVoisin) {
+        super(taillePlateau, typeInitialisation, decalageVoisin, directionsVoisin);
     }
-    
 }

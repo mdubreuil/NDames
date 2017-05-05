@@ -7,9 +7,7 @@ package algo;
  */
 
 public class RecuitSimule extends Optimisation {
-
-    public RecuitSimule(int decalageVoisin, int directionsVoisin) {
-        super(decalageVoisin, directionsVoisin);
+    public RecuitSimule(int taillePlateau, int typeInitialisation, int decalageVoisin, int directionsVoisin) {
+        super(taillePlateau, typeInitialisation, decalageVoisin, directionsVoisin);
     }
-    
 }

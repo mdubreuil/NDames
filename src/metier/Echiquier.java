@@ -1,10 +1,9 @@
 package metier;
 
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  *
@@ -12,22 +11,30 @@ import java.util.Set;
  * 
  */
 
-public class Echiquier {
+public class Echiquier implements IEchiquier {
     private boolean estSolution;
-    private List<Dame> dames;
     private Map<Integer,List<Integer>> listeColonne;
     private Map<Integer,List<Integer>> listeLigne;
     private int nbConflits;
     private int tailleEchiquier;
-    private int typeInitialisation; // TODO : replacer par enum
+    
+    /**
+     * @deprecated 
+     */
+    private List<Dame> dames;
 
-    public Echiquier(int tailleEchiquier, int typeInitialisation) {
+    public Echiquier(int tailleEchiquier) {
         this.tailleEchiquier = tailleEchiquier;
-        this.typeInitialisation = typeInitialisation;
         this.listeColonne = new HashMap<>();
         this.listeLigne = new HashMap<>();
     }
     
+    /**
+     * @deprecated 
+     * @param x
+     * @param y
+     * @return 
+     */
     public Dame getDame(int x, int y) {
         for (Dame dame : dames) {
             if (dame.getX() == x  && dame.getY() == y) {
@@ -36,7 +43,8 @@ public class Echiquier {
         }
         return null;
     }
-    
+
+    @Override
     public int calculeConflits() {
         int nbConflitsTotal = 0;
         
@@ -64,7 +72,7 @@ public class Echiquier {
         return nbConflitsTotal;
     }
     
-    public int calculeConflitsDiagonale(int colonne, int ligne) {
+    private int calculeConflitsDiagonale(int colonne, int ligne) {
         int conflits = 0;
         int x = 0, y = 0;
 
@@ -123,10 +131,6 @@ public class Echiquier {
         return tailleEchiquier;
     }
 
-    public int getTypeInitialisation() {
-        return typeInitialisation;
-    }
-
     public void setDames(List<Dame> dames) {
         this.dames = dames;
     }
@@ -147,4 +151,65 @@ public class Echiquier {
         this.listeLigne = listeLigne;
     }
     
+    @Override
+    public void initialisationRandom() {
+        int cptDames = 0;
+        
+        while (cptDames < tailleEchiquier) {
+            
+            cptDames++;
+        }
+    }
+
+    @Override
+    public void initialisationOptimisee() {
+        List<Dame> lDamesInitiale = new ArrayList(); // Deprecated
+        Map<Integer, List<Integer>> lColonne = new HashMap();//this.getListeColonne();
+        Map<Integer, List<Integer>> lLigne = new HashMap();//this.getListeLigne();
+                
+        int nbPair = 2, nbImpair = 1, indiceColonne = 1;
+        
+        // TODO : A optimiser ?
+        while (indiceColonne < tailleEchiquier/2 + 1){
+            Dame d = new Dame(indiceColonne,indiceColonne,nbImpair);
+            lDamesInitiale.add(d);
+            ajoutHashMap(lColonne,lLigne,indiceColonne,nbImpair);
+            nbImpair = nbImpair + 2;
+            indiceColonne++;
+        }
+        
+        while (indiceColonne <= tailleEchiquier){
+            Dame d = new Dame(indiceColonne,indiceColonne,nbPair);
+            lDamesInitiale.add(d);
+            ajoutHashMap(lColonne,lLigne,indiceColonne,nbPair);
+            nbPair = nbPair + 2;
+            indiceColonne++;
+        }
+        
+        if((tailleEchiquier % 2 == 1) && (indiceColonne == tailleEchiquier + 1)){
+            Dame d = new Dame(tailleEchiquier,tailleEchiquier,tailleEchiquier);
+            lDamesInitiale.add(d);
+            ajoutHashMap(lColonne,lLigne,indiceColonne,tailleEchiquier);
+        }
+        
+        this.setListeColonne(lColonne);
+        this.setListeLigne(lLigne);
+        this.setDames(lDamesInitiale);
+    }
+
+    @Override
+    public void initialisationRandomOptimisee() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+    
+    private void ajoutHashMap(Map<Integer, List<Integer>> listeColonne, Map<Integer, List<Integer>> listeLigne, int indiceColonne, int indiceLigne){
+        List<Integer> lIndicesColonnes =  new ArrayList<>();
+        List<Integer> lIndicesLignes =  new ArrayList<>();
+        
+        lIndicesColonnes.add(indiceColonne);
+        lIndicesLignes.add(indiceLigne);
+        
+        listeColonne.put(indiceColonne, lIndicesColonnes);
+        listeColonne.put(indiceLigne, lIndicesLignes);
+    }
 }
