@@ -1,7 +1,9 @@
 package algo;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import metier.*;
 
 /**
@@ -38,12 +40,16 @@ public abstract class Optimisation {
     
     public void initialisationPlateau(int strategie, int nbDames) {
         List<Dame> lDamesInitiale = new ArrayList<Dame>();
+        Map<Integer, List<Integer>> lColonne = solutionInitiale.getListeColonne();
+        Map<Integer, List<Integer>> lLigne = solutionInitiale.getListeLigne();
+                
         int nbPair = 2, nbImpair = 1, indiceColonne = 1;
         
         // TODO : A optimiser ?
         while (indiceColonne < nbDames/2 + 1){
             Dame d = new Dame(indiceColonne,indiceColonne,nbImpair);
             lDamesInitiale.add(d);
+            ajoutHashMap(lColonne,lLigne,indiceColonne,nbImpair);
             nbImpair = nbImpair + 2;
             indiceColonne++;
         }
@@ -51,17 +57,32 @@ public abstract class Optimisation {
         while (indiceColonne <= nbDames){
             Dame d = new Dame(indiceColonne,indiceColonne,nbPair);
             lDamesInitiale.add(d);
+            ajoutHashMap(lColonne,lLigne,indiceColonne,nbPair);
             nbPair = nbPair + 2;
             indiceColonne++;
         }
         
         if((nbDames % 2 == 1) && (indiceColonne == nbDames + 1)){
-            Dame d = new Dame(nbDames,nbDames,1);
+            Dame d = new Dame(nbDames,nbDames,nbDames);
             lDamesInitiale.add(d);
+            ajoutHashMap(lColonne,lLigne,indiceColonne,nbDames);
         }
         
         solutionInitiale = new Echiquier(nbDames,strategie);
+        solutionInitiale.setListeColonne(lColonne);
+        solutionInitiale.setListeLigne(lLigne);
         solutionInitiale.setDames(lDamesInitiale);
+    }
+    
+    public void ajoutHashMap(Map<Integer, List<Integer>> listeColonne, Map<Integer, List<Integer>> listeLigne, int indiceColonne, int indiceLigne){
+        List<Integer> lIndicesColonnes =  new ArrayList<>();
+        List<Integer> lIndicesLignes =  new ArrayList<>();
+        
+        lIndicesColonnes.add(indiceColonne);
+        lIndicesLignes.add(indiceLigne);
+        
+        listeColonne.put(indiceColonne, lIndicesColonnes);
+        listeColonne.put(indiceLigne, lIndicesLignes);
     }
     
     public void afficherEchiquier(int nbDames){

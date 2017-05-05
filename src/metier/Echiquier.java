@@ -14,7 +14,7 @@ public class Echiquier {
     private boolean estSolution;
     private List<Dame> dames;
     private Map<Integer,List<Integer>> listeColonne;
-    private HashMap<Integer,List<Integer>> listeLigne;
+    private Map<Integer,List<Integer>> listeLigne;
     private int nbConflits;
     private int tailleEchiquier;
     private int typeInitialisation; // TODO : replacer par enum
@@ -32,7 +32,6 @@ public class Echiquier {
                 return dame;
             }
         }
-        
         return null;
     }
     
@@ -59,6 +58,22 @@ public class Echiquier {
 
     public void setDames(List<Dame> dames) {
         this.dames = dames;
+    }
+
+    public Map<Integer, List<Integer>> getListeColonne() {
+        return listeColonne;
+    }
+
+    public Map<Integer, List<Integer>> getListeLigne() {
+        return listeLigne;
+    }
+
+    public void setListeColonne(Map<Integer, List<Integer>> listeColonne) {
+        this.listeColonne = listeColonne;
+    }
+
+    public void setListeLigne(Map<Integer, List<Integer>> listeLigne) {
+        this.listeLigne = listeLigne;
     }
     
 }
