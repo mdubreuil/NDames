@@ -3,7 +3,7 @@ package metier;
 /**
  *
  * @author Mélanie DUBREUIL, Ophélie EOUZAN - POLYTECH LYON - 4APP
- * 
+ * @deprecated 
  */
 
 public class Dame {
