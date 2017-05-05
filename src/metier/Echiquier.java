@@ -82,37 +82,37 @@ public class Echiquier implements IEchiquier {
         int x = 0, y = 0;
 
         // Diagonale haut-gauche
-        for (x = ligne, y = colonne; x > 0 && y > 0 && x <= tailleEchiquier && y <= tailleEchiquier; x--, y--) {
+        for (x = ligne - 1, y = colonne - 1; x > 0 && y > 0 && x <= tailleEchiquier && y <= tailleEchiquier; x--, y--) {
             if (listeColonne.get(y).size() > 0) {
                 for (int i : listeColonne.get(y)) {
-                    if (y == i) conflits++;
+                    if (x == i) conflits++;
                 }
             }
         }
 
         // Diagonale haut-droite
-        for (x = ligne, y = colonne; x > 0 && y > 0 && x <= tailleEchiquier && y <= tailleEchiquier; x--, y++) {
+        for (x = ligne - 1, y = colonne + 1; x > 0 && y > 0 && x <= tailleEchiquier && y <= tailleEchiquier; x--, y++) {
             if (listeColonne.get(y).size() > 0) {
                 for (int i : listeColonne.get(y)) {
-                    if (y == i) conflits++;
+                    if (x == i) conflits++;
                 }
             }
         }
         
         // Diagonale bas-gauche
-        for (x = ligne, y = colonne; x > 0 && y > 0 && x <= tailleEchiquier && y <= tailleEchiquier; x++, y--) {
+        for (x = ligne + 1, y = colonne - 1; x > 0 && y > 0 && x <= tailleEchiquier && y <= tailleEchiquier; x++, y--) {
             if (listeColonne.get(y).size() > 0) {
                 for (int i : listeColonne.get(y)) {
-                    if (y == i) conflits++;
+                    if (x == i) conflits++;
                 }
             }
         }
         
         // Diagonale bas-droite
-        for (x = ligne, y = colonne; x > 0 && y > 0 && x <= tailleEchiquier && y <= tailleEchiquier; x++, y++) {
+        for (x = ligne + 1, y = colonne + 1; x > 0 && y > 0 && x <= tailleEchiquier && y <= tailleEchiquier; x++, y++) {
             if (listeColonne.get(y).size() > 0) {
                 for (int i : listeColonne.get(y)) {
-                    if (y == i) conflits++;
+                    if (x == i) conflits++;
                 }
             }
         }
@@ -227,8 +227,7 @@ public class Echiquier implements IEchiquier {
 
     @Override
     public void afficherEchiquier() {
-        System.out.println("    ---------------------------------");
-        
+        System.out.println("   ---------------------------------");
         for (int ligne = 1; ligne <= tailleEchiquier; ligne++) {
             System.out.print(ligne + ": |");
             for (int colonne = 1; colonne <= tailleEchiquier; colonne++) {
@@ -238,7 +237,7 @@ public class Echiquier implements IEchiquier {
                     System.out.print("___|");
                 }
             }
-            System.out.println("\n    ---------------------------------");
+            System.out.println("\n   ---------------------------------");
         }
     }
 }

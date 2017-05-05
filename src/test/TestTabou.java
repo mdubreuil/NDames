@@ -18,5 +18,6 @@ public class TestTabou {
         
         Optimisation opti = new Tabou(tailleEquichier, typeInitialisation, decalageVoisinnage, directionVoisinnage);
         opti.setVerbose(true);
+        opti.run(2);
     }
 }

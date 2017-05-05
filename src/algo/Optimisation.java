@@ -53,9 +53,7 @@ public abstract class Optimisation {
 
     public void setVerbose(boolean verbose) {
         this.verbose = verbose;
-
-        if (verbose) {
-            this.solutionInitiale.afficherEchiquier();
-        }
     }
+    
+    public abstract void run(int nbIteration);
 }
