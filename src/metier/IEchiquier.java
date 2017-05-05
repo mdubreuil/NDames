@@ -9,7 +9,7 @@ import java.util.Map;
  * @author Mélanie DUBREUIL
  * @author Ophélie EOUZAN
  */
-public interface IEchiquier extends Cloneable {
+public interface IEchiquier {
 
     public void initialisationRandom();
     public void initialisationOptimisee();
@@ -25,5 +25,7 @@ public interface IEchiquier extends Cloneable {
     
     public Map<Dame, List<Dame>> getVoisins();
     
-    public Echiquier getVoisin(Dame origine, Dame voisine);
+    public boolean getVoisin(Dame origine, Dame voisine);
+    
+    public boolean reset(Dame origine, Dame voisine);
 }

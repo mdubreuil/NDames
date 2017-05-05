@@ -2,9 +2,9 @@ package algo;
 
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import metier.Dame;
-import metier.Echiquier;
-import metier.IEchiquier;
 
 /**
  *
@@ -31,34 +31,54 @@ public class Tabou extends Optimisation
         System.out.println("Nb conflits total : " + fitness);
 
         int cptIteration = 1;
+        System.out.println("\n\nItération n°" + cptIteration);
         
         // Recupère tous les voisins possibles de la solution actuelle
         Map<Dame, List<Dame>> voisinsMap = solutionInitiale.getVoisins();
-        System.out.println("Itération n°" + cptIteration);
-        System.out.println("\nNb de voisins trouvés : " + voisinsMap.size());
 
         // Pour chaque voisin, garder le meilleur
+        int idVoisin = 1;
+        Dame solutionOrigine = null, solutionVoisine = null;
         for (Map.Entry<Dame, List<Dame>> voisinList : voisinsMap.entrySet()) {
-            Dame origin = voisinList.getKey();    
-            Dame firstDame = voisinList.getValue().get(0);
-            
-            Echiquier voisin = solutionInitiale.getVoisin(origin, firstDame);
-            int nbConflits = voisin.calculeConflits();
-            
-            if (verbose) {
-                System.out.println("Voisin n°" + cptIteration);
-                voisin.afficherEchiquier();
-                System.out.println("Nb conflits total : " + fitness);
+            Dame origin = voisinList.getKey();
+            System.out.println("Affichage de " + voisinList.getValue().size() + " voisins\n");
+            for (Dame voisine : voisinList.getValue()) {
+                if (!solutionInitiale.getVoisin(origin, voisine)) {
+                    System.err.println("Erreur lors de la création du voisin " + idVoisin);
+                }
+                int nbConflits = solutionInitiale.calculeConflits();
+
+                // Affichage des résultats d'un voisin
+                System.out.println("Voisin n°" + idVoisin);
+                if (verbose) solutionInitiale.afficherEchiquier();
+                System.out.println("Nb conflits total : " + nbConflits);
+                
+                // Retour à l'état initial du plateau
+                if(!solutionInitiale.reset(origin, voisine)) {
+                    System.err.println("Erreur lors du rétablissement du plateau initial");
+                }
+
+                if (nbConflits < fitness) {
+                    System.out.println("Voisin n°" + idVoisin + " retenu");
+                    try {
+                        fitness = nbConflits;
+                        solutionOrigine = origin.clone();
+                        solutionVoisine = voisine.clone();
+                    } catch (CloneNotSupportedException ex) {
+                        Logger.getLogger(Tabou.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+
+                if (fitness == 0) break;
+                
+                idVoisin++;
             }
-            
-            if (nbConflits < fitness) {
-                fitness = nbConflits;
-                solutionInitiale = voisin;
-            }
-            
+
             break;
         }
         
+        
+
 //        if (cptIteration > nbIteration) {
 //            break;
 //        }

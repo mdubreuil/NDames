@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -17,8 +15,8 @@ public class Echiquier implements IEchiquier {
     private boolean estSolution;
     private Map<Integer,List<Integer>> listeColonne;
     private Map<Integer,List<Integer>> listeLigne;
-    private int nbConflits;
-    private int tailleEchiquier;
+    private int fitness;
+    private final int tailleEchiquier;
     
     /**
      * @deprecated 
@@ -63,8 +61,11 @@ public class Echiquier implements IEchiquier {
                     int conflits = 0;
                     
                     // 1. Conflits de ligne
-                    conflits += listeLigne.get(ligne).size() - 1;
-                    
+                    int nbLignes = listeLigne.getOrDefault(ligne, new ArrayList()).size();
+                    if (nbLignes > 0) {
+                        conflits += nbLignes - 1;
+                    }
+
                     // 2. Conflits de colonne
                     conflits += listeColonne.get(colonne).size() - 1;
                     
@@ -128,10 +129,6 @@ public class Echiquier implements IEchiquier {
 
     public List<Dame> getDames() {
         return dames;
-    }
-
-    public int getNbConflits() {
-        return nbConflits;
     }
 
     public int getTailleEchiquier() {
@@ -247,19 +244,22 @@ public class Echiquier implements IEchiquier {
     public Map<Dame, List<Dame>> getVoisins()
     {
         Map<Dame, List<Dame>> voisins = new HashMap();
+        int nbVoisins = 0;
         
         for (Map.Entry<Integer, List<Integer>> entry : listeColonne.entrySet()) {
             if (entry.getValue().size() > 0) {
-                int colonne = entry.getKey();
+                Integer colonne = entry.getKey();
                 for (Integer ligne : entry.getValue()) {
                     // Dame (colonne, ligne)
                     Dame dame = new Dame(ligne, colonne);
-                    
                     List<Dame> voisinesDame = new ArrayList();
                     
-                    for (int x = ligne - 1; x > 0 && x < ligne + 1 && x < tailleEchiquier; x++) {
-                        for (int y = colonne - 1; y > 0 && y < colonne + 1 && y < tailleEchiquier; y++) {
-                            voisinesDame.add(new Dame(x, y));
+                    for (int x = ligne - 1; x > 0 && x <= ligne + 1 && x < tailleEchiquier; x++) {
+                        for (int y = colonne - 1; y > 0 && y <= colonne + 1 && y < tailleEchiquier; y++) {
+                            if (!exists((Integer) x, (Integer) y)) {
+                                voisinesDame.add(new Dame(x, y));
+                                nbVoisins++;
+                            }
                         }
                     }
                     
@@ -268,31 +268,71 @@ public class Echiquier implements IEchiquier {
             }
         }
         
+        System.out.println("Nb voisins trouvés : " + nbVoisins);
+        
         return voisins;
     }
 
+    
+    /**
+     * Renvoie l'échiquier actuel, ou le voisin si celui-ci a une meilleure fitness
+     * @param origine Case à remplacer
+     * @param voisine Case remplaçante
+     * @return 
+     */
     @Override
-    public Echiquier getVoisin(Dame origine, Dame voisine) {
-        try {
-            Echiquier voisin = (Echiquier) this.clone();
-            Integer ligneOrigine = (Integer) origine.getX();
-            Integer colonneOrigine = (Integer) origine.getY();
-            Integer ligneVoisin = (Integer) voisine.getX();
-            Integer colonneVoisin = (Integer) voisine.getY();
+    public boolean getVoisin(Dame origine, Dame voisine) {
+        Integer ligneOrigine = (Integer) origine.getX();
+        Integer colonneOrigine = (Integer) origine.getY();
+        Integer ligneVoisin = (Integer) voisine.getX();
+        Integer colonneVoisin = (Integer) voisine.getY();
+
+        if (exists(ligneOrigine, colonneOrigine) && !exists(ligneVoisin, colonneVoisin)) {
+            this.remove(ligneOrigine, colonneOrigine);
+            this.add(ligneVoisin, colonneVoisin);
             
-            // Remove origine
-            voisin.listeColonne.get(colonneOrigine).remove(ligneOrigine);
-            voisin.listeLigne.get(ligneOrigine).remove(colonneOrigine);
+            return true;
+        }
+        
+        return false;
+    }
+    
+    @Override
+    public boolean reset(Dame origine, Dame voisine) {
+        Integer ligneOrigine = (Integer) origine.getX();
+        Integer colonneOrigine = (Integer) origine.getY();
+        Integer ligneVoisin = (Integer) voisine.getX();
+        Integer colonneVoisin = (Integer) voisine.getY();
 
-            // Add voisine
-            voisin.listeColonne.get(colonneVoisin).add(ligneVoisin);
-            voisin.listeLigne.getOrDefault(ligneVoisin, new ArrayList()).add(colonneVoisin);
-
-            return voisin;
-        } catch (CloneNotSupportedException ex) {
-            Logger.getLogger(Echiquier.class.getName()).log(Level.SEVERE, null, ex);
+        if (exists(ligneVoisin, colonneVoisin) && !exists(ligneOrigine, colonneOrigine)) {
+            this.remove(ligneVoisin, colonneVoisin);
+            this.add(ligneOrigine, colonneOrigine);
+            
+            return true;
+        }
+        
+        return false;
+    }
+    
+    protected void remove(Integer ligne, Integer colonne) {
+        listeColonne.get(colonne).remove(ligne);
+        listeLigne.get(ligne).remove(colonne);
+    }
+    
+    protected boolean exists(Integer ligne, Integer colonne) {
+        if (listeColonne.get(colonne).contains(ligne) && listeLigne.getOrDefault(ligne, new ArrayList()).contains(colonne)) {
+            return true;
         }
 
-        return null;
+        return false;
+    }
+    
+    protected void add(Integer ligne, Integer colonne) {
+        listeColonne.get(colonne).add(ligne);
+        listeLigne.getOrDefault(ligne, new ArrayList()).add(colonne);
+    }
+
+    public int getFitness() {
+        return this.fitness;
     }
 }
