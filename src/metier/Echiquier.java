@@ -28,10 +28,10 @@ public class Echiquier implements IEchiquier {
         this.listeColonne = new HashMap();
         this.listeLigne = new HashMap();
 
-        for (int i = 1; i < tailleEchiquier; i++) {
-            listeColonne.put(i, new ArrayList());
-            listeLigne.put(i, new ArrayList());
-        }
+//        for (int i = 1; i < tailleEchiquier; i++) {
+//            listeColonne.put(i, new ArrayList());
+//            listeLigne.put(i, new ArrayList());
+//        }
     }
     
     /**
@@ -160,17 +160,17 @@ public class Echiquier implements IEchiquier {
     public void initialisationRandom() {
         int min = 1, max = tailleEchiquier;
         
-        for (int colonne = min; colonne < tailleEchiquier; colonne++) {
+        for (int colonne = min; colonne <= tailleEchiquier; colonne++) {
             int ligne = min + (int)(Math.random() * ((max - min) + 1));
             
-            List<Integer> lignes = new ArrayList();
-            List<Integer> colonnes = new ArrayList();
+            List<Integer> lignes = listeColonne.getOrDefault((Integer)colonne, new ArrayList());
+            List<Integer> colonnes = listeLigne.getOrDefault((Integer)ligne, new ArrayList());
             lignes.add(ligne);
             colonnes.add(colonne);
             
             this.listeColonne.putIfAbsent(colonne, lignes);
             this.listeLigne.putIfAbsent(ligne, colonnes);
-        }        
+        }
     }
 
     @Override
