@@ -43,20 +43,19 @@ public class Tabou extends Optimisation
             Dame origin = voisinList.getKey();
             System.out.println("Affichage de " + voisinList.getValue().size() + " voisins\n");
             for (Dame voisine : voisinList.getValue()) {
-                if (!solutionInitiale.getVoisin(origin, voisine)) {
-                    System.err.println("Erreur lors de la création du voisin " + idVoisin);
-                }
+                // Modification du plateau actuel en un de ses voisins
+                solutionInitiale.getVoisin(origin, voisine);
+                
+                // Calcul des conflits relatifs au voisin
                 int nbConflits = solutionInitiale.calculeConflits();
 
-                // Affichage des résultats d'un voisin
+                // Affichage des résultats du voisin
                 System.out.println("Voisin n°" + idVoisin);
                 if (verbose) solutionInitiale.afficherEchiquier();
                 System.out.println("Nb conflits total : " + nbConflits);
                 
                 // Retour à l'état initial du plateau
-                if(!solutionInitiale.reset(origin, voisine)) {
-                    System.err.println("Erreur lors du rétablissement du plateau initial");
-                }
+                solutionInitiale.reset(origin, voisine);
 
                 if (nbConflits < fitness) {
                     System.out.println("Voisin n°" + idVoisin + " retenu");
@@ -73,8 +72,6 @@ public class Tabou extends Optimisation
                 
                 idVoisin++;
             }
-
-            break;
         }
         
         

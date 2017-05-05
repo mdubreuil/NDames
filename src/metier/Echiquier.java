@@ -278,53 +278,36 @@ public class Echiquier implements IEchiquier {
      * Renvoie l'échiquier actuel, ou le voisin si celui-ci a une meilleure fitness
      * @param origine Case à remplacer
      * @param voisine Case remplaçante
-     * @return 
      */
     @Override
-    public boolean getVoisin(Dame origine, Dame voisine) {
+    public void getVoisin(Dame origine, Dame voisine) {
         Integer ligneOrigine = (Integer) origine.getX();
         Integer colonneOrigine = (Integer) origine.getY();
         Integer ligneVoisin = (Integer) voisine.getX();
         Integer colonneVoisin = (Integer) voisine.getY();
 
-        if (exists(ligneOrigine, colonneOrigine) && !exists(ligneVoisin, colonneVoisin)) {
-            this.remove(ligneOrigine, colonneOrigine);
-            this.add(ligneVoisin, colonneVoisin);
-            
-            return true;
-        }
-        
-        return false;
+        this.remove(ligneOrigine, colonneOrigine);
+        this.add(ligneVoisin, colonneVoisin);
     }
     
     @Override
-    public boolean reset(Dame origine, Dame voisine) {
+    public void reset(Dame origine, Dame voisine) {
         Integer ligneOrigine = (Integer) origine.getX();
         Integer colonneOrigine = (Integer) origine.getY();
         Integer ligneVoisin = (Integer) voisine.getX();
         Integer colonneVoisin = (Integer) voisine.getY();
 
-        if (exists(ligneVoisin, colonneVoisin) && !exists(ligneOrigine, colonneOrigine)) {
-            this.remove(ligneVoisin, colonneVoisin);
-            this.add(ligneOrigine, colonneOrigine);
-            
-            return true;
-        }
-        
-        return false;
+        this.add(ligneOrigine, colonneOrigine);
+        this.remove(ligneVoisin, colonneVoisin);
     }
     
     protected void remove(Integer ligne, Integer colonne) {
         listeColonne.get(colonne).remove(ligne);
-        listeLigne.get(ligne).remove(colonne);
+        listeLigne.getOrDefault(ligne, new ArrayList()).remove(colonne);
     }
     
     protected boolean exists(Integer ligne, Integer colonne) {
-        if (listeColonne.get(colonne).contains(ligne) && listeLigne.getOrDefault(ligne, new ArrayList()).contains(colonne)) {
-            return true;
-        }
-
-        return false;
+        return listeColonne.get(colonne).contains(ligne) && listeLigne.getOrDefault(ligne, new ArrayList()).contains(colonne);
     }
     
     protected void add(Integer ligne, Integer colonne) {

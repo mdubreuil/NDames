@@ -25,7 +25,7 @@ public interface IEchiquier {
     
     public Map<Dame, List<Dame>> getVoisins();
     
-    public boolean getVoisin(Dame origine, Dame voisine);
+    public void getVoisin(Dame origine, Dame voisine);
     
-    public boolean reset(Dame origine, Dame voisine);
+    public void reset(Dame origine, Dame voisine);
 }
