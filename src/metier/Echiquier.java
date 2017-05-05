@@ -25,8 +25,13 @@ public class Echiquier implements IEchiquier {
 
     public Echiquier(int tailleEchiquier) {
         this.tailleEchiquier = tailleEchiquier;
-        this.listeColonne = new HashMap<>();
-        this.listeLigne = new HashMap<>();
+        this.listeColonne = new HashMap();
+        this.listeLigne = new HashMap();
+
+        for (int i = 1; i < tailleEchiquier; i++) {
+            listeColonne.put(i, new ArrayList());
+            listeLigne.put(i, new ArrayList());
+        }
     }
     
     /**
@@ -153,12 +158,19 @@ public class Echiquier implements IEchiquier {
     
     @Override
     public void initialisationRandom() {
-        int cptDames = 0;
+        int min = 1, max = tailleEchiquier;
         
-        while (cptDames < tailleEchiquier) {
+        for (int colonne = min; colonne < tailleEchiquier; colonne++) {
+            int ligne = min + (int)(Math.random() * ((max - min) + 1));
             
-            cptDames++;
-        }
+            List<Integer> lignes = new ArrayList();
+            List<Integer> colonnes = new ArrayList();
+            lignes.add(ligne);
+            colonnes.add(colonne);
+            
+            this.listeColonne.putIfAbsent(colonne, lignes);
+            this.listeLigne.putIfAbsent(ligne, colonnes);
+        }        
     }
 
     @Override
@@ -211,5 +223,22 @@ public class Echiquier implements IEchiquier {
         
         listeColonne.put(indiceColonne, lIndicesColonnes);
         listeColonne.put(indiceLigne, lIndicesLignes);
+    }
+
+    @Override
+    public void afficherEchiquier() {
+        System.out.println("    ---------------------------------");
+        
+        for (int ligne = 1; ligne <= tailleEchiquier; ligne++) {
+            System.out.print(ligne + ": |");
+            for (int colonne = 1; colonne <= tailleEchiquier; colonne++) {
+                if (listeLigne.get(ligne) != null && listeLigne.get(ligne).contains((Integer)colonne)) {
+                    System.out.print("_X_|");
+                } else {
+                    System.out.print("___|");
+                }
+            }
+            System.out.println("\n    ---------------------------------");
+        }
     }
 }

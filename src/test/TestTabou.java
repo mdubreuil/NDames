@@ -14,9 +14,9 @@ public class TestTabou {
         int tailleEquichier = 8;
         int decalageVoisinnage = 1;
         int directionVoisinnage = 1; // Correspond aux 8 directions environnantes
-        int typeInitialisation = 1; // Initialisation opti = 1 ; Initialisation random = 2 ;
+        int typeInitialisation = 2; // Initialisation opti = 1 ; Initialisation random = 2 ;
         
         Optimisation opti = new Tabou(tailleEquichier, typeInitialisation, decalageVoisinnage, directionVoisinnage);
-        opti.afficherEchiquier(9);
+        opti.setVerbose(true);
     }
 }

@@ -1,9 +1,5 @@
 package algo;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import metier.*;
 
 /**
@@ -13,9 +9,10 @@ import metier.*;
  */
 
 public abstract class Optimisation {
-    private int decalageVoisin;
-    private int directionsVoisin;
-    private Echiquier solutionInitiale;
+    protected int decalageVoisin;
+    protected int directionsVoisin;
+    protected IEchiquier solutionInitiale;
+    protected boolean verbose = false;
 
     public Optimisation(int taillePlateau, int typeInitialisation, int decalageVoisin, int directionsVoisin) {
         this.decalageVoisin = decalageVoisin;
@@ -50,26 +47,15 @@ public abstract class Optimisation {
         this.directionsVoisin = directionsVoisin;
     }
 
-    /**
-     * @deprecated 
-     * @param nbDames 
-     */
-    public void afficherEchiquier(int nbDames){
-        
-        System.out.println("-------------------");
-        
-        for (int i = 1; i <= nbDames; i++) {
-            System.out.print(i + ": |");
-            for (int y = 1; y <= nbDames; y++) {
-                Dame dame = solutionInitiale.getDame(i, y);
-                
-                if (dame != null) {
-                    System.out.print(dame.getIdentifiant() + "|");
-                } else {
-                    System.out.print(" |");
-                }
-            }
-            System.out.println("\n-------------------");
+    public boolean isVerbose() {
+        return verbose;
+    }
+
+    public void setVerbose(boolean verbose) {
+        this.verbose = verbose;
+
+        if (verbose) {
+            this.solutionInitiale.afficherEchiquier();
         }
     }
 }

@@ -17,4 +17,6 @@ public interface IEchiquier {
      * @return int
      */
     public int calculeConflits();
+    
+    public void afficherEchiquier();
 }
