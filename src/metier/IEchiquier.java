@@ -3,6 +3,7 @@ package metier;
 
 import java.util.List;
 import java.util.Map;
+import javafx.util.Pair;
 
 /**
  *
@@ -23,7 +24,7 @@ public interface IEchiquier {
     
     public void afficherEchiquier();
     
-    public Map<Dame, List<Dame>> getVoisins();
+    public Map<Pair<Integer, Integer>, List<Integer>> getVoisins();
     
     public void getVoisin(Dame origine, Dame voisine);
     

@@ -9,15 +9,37 @@ import metier.*;
  */
 
 public abstract class Optimisation {
+    
+    /**
+     * @deprecated 
+     */
     protected int decalageVoisin;
+    
+    /**
+     * @deprecated 
+     */
     protected int directionsVoisin;
+    
+    /**
+     * Solution en cours
+     * Au départ = x0
+     */
     protected IEchiquier solutionInitiale;
+    
+    /**
+     * Affichage d'information sur l'état de l'algo en console
+     */
     protected boolean verbose = false;
+    
+    /**
+     * Nombre d'itération max
+     */
+    protected int nmax;
 
     public Optimisation(int taillePlateau, int typeInitialisation, int decalageVoisin, int directionsVoisin) {
         this.decalageVoisin = decalageVoisin;
         this.directionsVoisin = directionsVoisin;
-        this.solutionInitiale = new Echiquier(taillePlateau);
+        this.solutionInitiale = new EchiquierSimple(taillePlateau);
         
         switch (typeInitialisation) { // TODO : replacer par enum
             case 1:

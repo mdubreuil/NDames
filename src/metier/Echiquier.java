@@ -11,17 +11,12 @@ import java.util.Map;
  * 
  */
 
-public class Echiquier implements IEchiquier {
+public class Echiquier /*implements IEchiquier*/ {
     private boolean estSolution;
     private Map<Integer,List<Integer>> listeColonne;
     private Map<Integer,List<Integer>> listeLigne;
     private int fitness;
     private final int tailleEchiquier;
-    
-    /**
-     * @deprecated 
-     */
-    private List<Dame> dames;
 
     public Echiquier(int tailleEchiquier) {
         this.tailleEchiquier = tailleEchiquier;
@@ -33,23 +28,8 @@ public class Echiquier implements IEchiquier {
 //            listeLigne.put(i, new ArrayList());
 //        }
     }
-    
-    /**
-     * @deprecated 
-     * @param x
-     * @param y
-     * @return 
-     */
-    public Dame getDame(int x, int y) {
-        for (Dame dame : dames) {
-            if (dame.getX() == x  && dame.getY() == y) {
-                return dame;
-            }
-        }
-        return null;
-    }
 
-    @Override
+//    @Override
     public int calculeConflits() {
         int nbConflitsTotal = 0;
         
@@ -127,16 +107,8 @@ public class Echiquier implements IEchiquier {
         return estSolution;
     }
 
-    public List<Dame> getDames() {
-        return dames;
-    }
-
     public int getTailleEchiquier() {
         return tailleEchiquier;
-    }
-
-    public void setDames(List<Dame> dames) {
-        this.dames = dames;
     }
 
     public Map<Integer, List<Integer>> getListeColonne() {
@@ -155,7 +127,7 @@ public class Echiquier implements IEchiquier {
         this.listeLigne = listeLigne;
     }
     
-    @Override
+//    @Override
     public void initialisationRandom() {
         int min = 1, max = tailleEchiquier;
         
@@ -172,7 +144,7 @@ public class Echiquier implements IEchiquier {
         }
     }
 
-    @Override
+//    @Override
     public void initialisationOptimisee() {
 //        List<Dame> lDamesInitiale = new ArrayList(); // Deprecated
 //        Map<Integer, List<Integer>> lColonne = new HashMap();//this.getListeColonne();
@@ -208,7 +180,7 @@ public class Echiquier implements IEchiquier {
 //        this.setDames(lDamesInitiale);
     }
 
-    @Override
+//    @Override
     public void initialisationRandomOptimisee() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
@@ -224,7 +196,7 @@ public class Echiquier implements IEchiquier {
         listeColonne.put(indiceLigne, lIndicesLignes);
     }
 
-    @Override
+//    @Override
     public void afficherEchiquier() {
         System.out.println("   ---------------------------------");
         for (int ligne = 1; ligne <= tailleEchiquier; ligne++) {
@@ -240,7 +212,7 @@ public class Echiquier implements IEchiquier {
         }
     }
 
-    @Override
+//    @Override
     public Map<Dame, List<Dame>> getVoisins()
     {
         Map<Dame, List<Dame>> voisins = new HashMap();
@@ -279,7 +251,7 @@ public class Echiquier implements IEchiquier {
      * @param origine Case à remplacer
      * @param voisine Case remplaçante
      */
-    @Override
+//    @Override
     public void getVoisin(Dame origine, Dame voisine) {
         Integer ligneOrigine = (Integer) origine.getX();
         Integer colonneOrigine = (Integer) origine.getY();
@@ -290,7 +262,7 @@ public class Echiquier implements IEchiquier {
         this.add(ligneVoisin, colonneVoisin);
     }
     
-    @Override
+//    @Override
     public void reset(Dame origine, Dame voisine) {
         Integer ligneOrigine = (Integer) origine.getX();
         Integer colonneOrigine = (Integer) origine.getY();
