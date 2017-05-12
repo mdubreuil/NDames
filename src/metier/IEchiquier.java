@@ -2,8 +2,6 @@
 package metier;
 
 import java.util.List;
-import java.util.Map;
-import javafx.util.Pair;
 
 /**
  *
@@ -20,12 +18,14 @@ public interface IEchiquier {
      * Calcule le nombre de conflits présents sur l'instance de l'échiquier
      * @return int
      */
-    public int calculeConflits();
+    public int calculerConflits();
+    public int calculerConflits(List<Integer> voisin);
     
     public void afficherEchiquier();
     
-    public Map<Pair<Integer, Integer>, List<Integer>> getVoisins();
-    
+    //public Map<Pair<Integer, Integer>, List<Integer>> getVoisins();
+    public List<List<Integer>> calculerVoisins();
+
     public void getVoisin(Dame origine, Dame voisine);
     
     public void reset(Dame origine, Dame voisine);

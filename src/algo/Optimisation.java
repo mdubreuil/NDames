@@ -24,7 +24,9 @@ public abstract class Optimisation {
      * Solution en cours
      * Au départ = x0
      */
-    protected IEchiquier solutionInitiale;
+    protected IEchiquier echiquier;
+    
+    protected int n;
     
     /**
      * Affichage d'information sur l'état de l'algo en console
@@ -35,18 +37,25 @@ public abstract class Optimisation {
      * Nombre d'itération max
      */
     protected int nmax;
+    
+    public Optimisation(int taillePlateau) {
+        n = taillePlateau;
+        echiquier = new EchiquierSimple(taillePlateau);
+        echiquier.initialisationRandom();
+    }
 
     public Optimisation(int taillePlateau, int typeInitialisation, int decalageVoisin, int directionsVoisin) {
+        n = taillePlateau;
         this.decalageVoisin = decalageVoisin;
         this.directionsVoisin = directionsVoisin;
-        this.solutionInitiale = new EchiquierSimple(taillePlateau);
+        this.echiquier = new EchiquierSimple(taillePlateau);
         
         switch (typeInitialisation) { // TODO : replacer par enum
             case 1:
-                solutionInitiale.initialisationOptimisee();
+                echiquier.initialisationOptimisee();
                 break;
             case 2:
-                solutionInitiale.initialisationRandom();
+                echiquier.initialisationRandom();
                 break;
             default:
                 break;

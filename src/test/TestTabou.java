@@ -16,8 +16,9 @@ public class TestTabou {
         int directionVoisinnage = 1; // Correspond aux 8 directions environnantes
         int typeInitialisation = 2; // Initialisation opti = 1 ; Initialisation random = 2 ;
         
-        Optimisation opti = new Tabou(tailleEquichier, typeInitialisation, decalageVoisinnage, directionVoisinnage);
-        opti.setVerbose(true);
+        //Optimisation opti = new Tabou(tailleEquichier, typeInitialisation, decalageVoisinnage, directionVoisinnage);
+        Tabou opti = new Tabou(500, 100000);
+//        opti.setVerbose(true);
         opti.run(2);
     }
 }

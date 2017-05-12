@@ -2,24 +2,21 @@
 package metier;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
-import javafx.util.Pair;
 
 /**
  *
- * @author Epulapp
+ * @author Mélanie DUBREUIL, Ophélie EOUZAN - POLYTECH LYON - 4APP
+ * 
  */
 public class EchiquierSimple implements IEchiquier {
     
     protected int n;
-    protected List<Integer> reines; // indices = lignes ; valeurs = colonnes
+    protected List<Integer> reines = new ArrayList(); // indices = lignes ; valeurs = colonnes
 
     public EchiquierSimple(int n) {
         this.n = n;
-        this.reines = new ArrayList();
     }
 
     @Override
@@ -48,12 +45,16 @@ public class EchiquierSimple implements IEchiquier {
     }
 
     @Override
-    public int calculeConflits() {
+    public int calculerConflits() {
+        return calculerConflits(reines);
+    }
+    
+    @Override
+    public int calculerConflits(List<Integer> voisin) {
         int nbConflitsTotal = 0;
         
         for (int ligne = 0; ligne < n; ligne++) {
-            // 3. Conflits de diagonale
-            nbConflitsTotal += this.calculeConflitsDiagonale(ligne, reines.get(ligne));
+            nbConflitsTotal += this.calculeConflitsDiagonale(ligne, voisin.get(ligne));
         }
 
         return nbConflitsTotal;
@@ -61,7 +62,7 @@ public class EchiquierSimple implements IEchiquier {
 
     @Override
     public void afficherEchiquier() {
-        System.out.println("   ---------------------------------");
+//        System.out.println("   ---------------------------------");
         for (int ligne = 0; ligne < n; ligne++) {
             System.out.print(ligne + ": |");
             for (int colonne = 0; colonne < n; colonne++) {
@@ -71,15 +72,16 @@ public class EchiquierSimple implements IEchiquier {
                     System.out.print("___|");
                 }
             }
-            System.out.println("\n   ---------------------------------");
+//            System.out.println("\n   ---------------------------------");
         }
     }
 
     @Override
-    public Map<Pair<Integer, Integer>, List<Integer>> getVoisins() {
+    public /*Map<Pair<Integer, Integer>,*/ List<List<Integer>> calculerVoisins() {
         int nbVoisins = 0;
         Random rand = new Random();
-        Map<Pair<Integer, Integer>, List<Integer>> voisins = new HashMap(); // List<List<Integer>> voisinsList = new ArrayList();
+        //Map<Pair<Integer, Integer>, List<Integer>> voisins = new HashMap();
+        List<List<Integer>> voisins = new ArrayList();
 
         for (int ligne = 0; ligne < n; ligne++) {
 
@@ -90,6 +92,7 @@ public class EchiquierSimple implements IEchiquier {
             do {
                 randomColonne = rand.nextInt(n);
             } while (used.contains(randomColonne));
+            used.add(randomColonne);
             
             int randomLigne = n + 1; // throws a NullPointerException if reines has not the colonne
             for (int i = 0; i < n; i++) {
@@ -102,11 +105,11 @@ public class EchiquierSimple implements IEchiquier {
             voisin.set(randomLigne, colonne);
             voisin.set(ligne, randomColonne);
             
-            if (voisins.containsValue(voisin)) { // Eviter les doublons
+            if (voisins.contains(voisin)) { // Eviter les doublons
                 continue;
             }
 
-            voisins.put(new Pair(ligne, colonne), voisin);
+            voisins.add(/*new Pair(ligne, colonne), */voisin);
             nbVoisins++;
         }
         
