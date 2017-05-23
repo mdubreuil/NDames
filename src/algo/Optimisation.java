@@ -3,7 +3,6 @@ package algo;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import metier.*;
 
 /**
  *
@@ -11,21 +10,38 @@ import metier.*;
  * 
  */
 
+// TODO : Différente transformations locales à implémenter pour trouver des voisinnages :
+// - échanger 2 reines (colonne ou ligne) : fait
+// - 2-opt : pertinent ?
+// - insertion-décalage : pertinent ?
+// - inversion : pertinent ?
 public abstract class Optimisation {
-    
+
+    /**
+     * Taille de l'échiquier
+     */
     protected int n;
-    protected int fitness = 0;
+    
+    /**
+     * Fitness minimum
+     */
+    protected int fmin = 0;
+
+    /**
+     * Meilleure solution
+     */
+    protected List<Integer> xmin = new ArrayList();  // indices = lignes ; valeurs = colonnes
     
     /**
      * Itération courante
      */
-    protected int num = 1;
+    protected int num = 0;
     
     /**
-     * Meilleure solution courante et finale
+     * Fitness courante
      */
-    protected List<Integer> xmin = new ArrayList();  // indices = lignes ; valeurs = colonnes
-    
+    protected int fnum;
+
     /**
      * Solution courante
      */
@@ -54,11 +70,26 @@ public abstract class Optimisation {
         this.verbose = verbose;
     }
 
-    abstract List<List<Integer>> calculerVoisins(List<Integer> reines);
-    abstract int calculerConflits(List<Integer> voisin);
-    
     public abstract void run(int nbIteration);
     
+    // TODO : mettre en place de la généricité pour ces 2 méthodes !
+    abstract List<List<Integer>> calculerVoisins(List<Integer> reines);
+
+    protected void initialisation() {
+        System.out.println("Stratégie d'initialisation: Random");
+
+        xnum = initialisationRandom(); // TODO autres types d'initialisation
+        xmin = new ArrayList(xnum);
+        fnum = fmin = calculerConflits(xmin);
+        if (verbose) {
+            System.out.println();
+            System.out.println("Solution initiale");
+            afficherEchiquier(xnum);
+        }
+        System.out.println("Nb conflits initial: " + fnum);
+        System.out.println();
+    }
+
     public List<Integer> initialisationRandom() {
         Random rand = new Random();
         List<Integer> reines = new ArrayList();
@@ -76,8 +107,25 @@ public abstract class Optimisation {
         return reines;
     }
     
+    public int calculerConflits(List<Integer> voisin) {
+        int nbConflitsTotal = 0;
+        
+        for (int ligne = 0; ligne < n; ligne++) {
+            nbConflitsTotal += this.calculeConflitsDiagonale(voisin, ligne, voisin.get(ligne));
+        }
+
+        return nbConflitsTotal;
+    }
+    
     protected void afficherEchiquier(List<Integer> reines) {
-        System.out.println("   ---------------------------------");
+        // Generate border
+        String trait = "    ";
+        for (int i = 0; i < n; i++) {
+            trait += "----";
+        }
+
+        // Display
+        System.out.println(trait);
         for (int ligne = 0; ligne < n; ligne++) {
             System.out.print(ligne + ": |");
             for (int colonne = 0; colonne < n; colonne++) {
@@ -87,7 +135,7 @@ public abstract class Optimisation {
                     System.out.print("___|");
                 }
             }
-            System.out.println("\n   ---------------------------------");
+            System.out.println("\n" + trait);
         }
     }
     
@@ -116,5 +164,17 @@ public abstract class Optimisation {
         }
         
         return conflits;
+    }
+    
+    // TODO regarder !!
+    protected int fitness(List<Integer> a){
+        int f = 0;
+        for (int i = 0; i < n; i++){
+            for (int j = i+1; j < n; j++){
+                if (Math.abs(i - j) == Math.abs(a.get(i) - a.get(j)))
+                    f++;
+            }
+        }
+        return f;
     }
 }
