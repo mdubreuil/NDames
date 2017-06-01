@@ -6,33 +6,64 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
-import javafx.util.Pair;
+import java.util.Random;
 
 /**
  *
  * @author Mélanie DUBREUIL, Ophélie EOUZAN - POLYTECH LYON - 4APP
  * 
  */
-
-/**
- * Modifier la structure de stockage des reines et des voisins :
- * - Stocker d'une part la ligne (ex: indice dans un arrayList), et de l'autre la colonne de la reine,
- *      cela permet de traiter moins de voisins, car on considère de toute façon qu'une solution optimale n'a pas plusieurs reines sur les mêmes lignes ou colonnes.
- *      Ainsi, le temps de calcule sera aussi optimisé et la mémoire aussi.
- * - Valable pour le recuit simulé et le Tabou, mais pas pour le génétique (garder solution actuelle).
- * 
- * TODO: Amélioration : sous-classe Tabou avec méthodes add(int x, int y), contains(int x, int y), ...
- */
 public class Tabou extends Optimisation
 {
-    
-    
+    public class Mouvement {
+        private final int colonne1, colonne2;
+
+        public Mouvement(int colonne1, int colonne2) {
+            this.colonne1 = colonne1;
+            this.colonne2 = colonne2;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+
+            final Mouvement other = (Mouvement) obj;
+            if (colonne1 == other.colonne1 && colonne2 == other.colonne2) {
+                return true;
+            } else if (colonne1 == other.colonne2 && colonne2 == other.colonne1) {
+                return true;
+            }
+            return false;
+        }
+
+        @Override
+        public int hashCode() {
+            int hash = 5;
+            hash = 79 * hash + this.colonne1;
+            hash = 79 * hash + this.colonne2;
+            return hash;
+        }
+
+        @Override
+        public String toString() {
+            return colonne1 + " - " + colonne2;
+        }
+    }
+
     /**
      * Définit le caractère aléatoire du résultat pour une même éxecution
      * - stochartique à true : on prend un échantillon dans le voisinnage, le résultat pourra varier
      * - déterministe (stochastique à false) : on prend tout le voisinnage, le résultat sera toujours le même
      */
-    protected boolean stochastique = false;
+    protected boolean stochastique = false; // TODO implémenter stochasticité
     
     /**
      * Si stochastique, taille de l'échantillon des voisins aléatoires à sélectionner
@@ -42,31 +73,24 @@ public class Tabou extends Optimisation
     /**
      * Liste des solutions tabous
      */
-//    protected List<Pair<Integer, Integer>> tabous = new ArrayList(); // permutations interdites
-    
-    protected Queue<Pair<Integer, Integer>> tabous = new LinkedList(); // colonne1-colonne2
+    protected Queue<Mouvement> tabous = new LinkedList(); // indice colonne1 - indice colonne2
     
     /**
      * Taille de la liste tabou
      */
     protected int nT = 3;
 
-    /**
-     * 
-     * @param n
-     * @param nmax
-     */
-    public Tabou(int n, int nmax) {
+    public Tabou (int n, int nmax) {
         super(n, nmax);
         System.out.println("Tabou - " + n);
     }
     
-    public Tabou(int n, int nmax, boolean stochastique) {
+    public Tabou (int n, int nmax, boolean stochastique) {
         this(n, nmax);
         this.stochastique = stochastique;
     }
     
-    public Tabou(int n, int nmax, boolean stochastique, int nechantillon) {
+    public Tabou (int n, int nmax, boolean stochastique, int nechantillon) {
         this(n, nmax, stochastique);
         this.nechantillon = nechantillon;
     }
@@ -75,34 +99,35 @@ public class Tabou extends Optimisation
     public void run(int nbIteration)
     {
         // Affichage état initial
+        System.out.println("Taille de la liste tabou: " + nT);
         if (stochastique) {
             System.out.println("Méthode stochastique");
+            System.out.println("Taille de l'échantillon aléatoire: " + nechantillon);
         } else {
             System.out.println("Méthode déterministe");
         }
 
         // Initialisation
         this.initialisation();
-        Map<Pair<Integer, Integer>, List<Integer>> C;
+        Map<Mouvement, List<Integer>> C;
 
         do {
 //            System.out.println("Intération " + num);
-            
-            // Voisins non tabous
-            C = calculerVoisins2(xnum);
-            
-//            if (stochastique) {
-//                C = voisinsAleatoires(C);
-//            }
-            
+
+            if (stochastique) {
+                C = genererVoisinsAleatoires();
+            } else {
+                // Voisins non tabous
+                C = genererVoisins();
+            }
+
             if (!C.isEmpty()) {
+
                 // Choix du voisin avec la meilleur fitness
-                List<Integer> bestVoisin = null;
                 int fitnessMin = -1;
-                
-                // Calcul du meilleur voisin
-                Pair<Integer, Integer> tabou = null;
-                for (Map.Entry<Pair<Integer, Integer>, List<Integer>> voisin : C.entrySet()) {
+                List<Integer> bestVoisin = null;
+                Mouvement tabou = null;
+                for (Map.Entry<Mouvement, List<Integer>> voisin : C.entrySet()) {
                     int fitnessVoisin = fitness(voisin.getValue());
                     if (fitnessMin < 0 || fitnessVoisin < fitnessMin) {
                         fitnessMin = fitnessVoisin;
@@ -114,7 +139,7 @@ public class Tabou extends Optimisation
                 // Ajout des tabous si notre nouveau choix dégrade la solution actuelle
                 int deltaFitness = fitnessMin - fnum;
                 if (deltaFitness >= 0) {
-                    this.addTabou(tabou);
+                    addTabou(tabou);
                 }
                 
                 // Traitement meilleur résultat
@@ -146,48 +171,42 @@ public class Tabou extends Optimisation
         System.out.println("Nb conflits total : " + fmin);
     }
 
-    private void addTabou(Pair<Integer, Integer> tabou) {
+    private void addTabou(Mouvement tabou) {
         if (tabou == null) {
             System.err.println("Tabou null");
             System.exit(num);
         }
 
-        int colonneOrigine = tabou.getKey();
-        int colonneVoisin = tabou.getValue();
-
         if (verbose) {
-            System.out.println("Ajout tabou : " + colonneOrigine + " - " + colonneVoisin);
+            System.out.println("Ajout tabou : " + tabou.toString());
         }
-        
+
         tabous.add(tabou);
-        
+
         if (tabous.size() > nT) {
-            Pair<Integer, Integer> tabouRemoved = tabous.poll();
+            Mouvement tabouRemoved = tabous.poll();
             if (verbose) {
-                System.out.println("Suppression tabou : " + tabouRemoved.getKey() + " - " + tabouRemoved.getValue());
+                System.out.println("Suppression tabou : " + tabouRemoved.toString());
             }
         }
     }
     
-    public Map<Pair<Integer, Integer>, List<Integer>> calculerVoisins2(List<Integer> reines) {
+    public Map<Mouvement, List<Integer>> genererVoisins() {
         int nbVoisins = 0;
-        Map<Pair<Integer, Integer>, List<Integer>> voisins = new HashMap();
+        Map<Mouvement, List<Integer>> voisins = new HashMap();
 
         // Pour chaque ligne
         for (int ligne = 0; ligne < n; ligne++) {
             for (int colonne = 0; colonne < n; colonne++) {
+                if (xnum.get(ligne) != colonne) {
+                    List<Integer> voisin = new ArrayList(xnum);
 
-                if (reines.get(ligne) != colonne) {
-                    List<Integer> voisin = new ArrayList(reines);
-                    int oldColonne = voisin.get(ligne);
-                    Pair<Integer, Integer> tabou = new Pair(oldColonne, colonne);
-                    
                     // Exclusion des tabous
-                    if (tabous.contains(tabou) || tabous.contains(new Pair(tabou.getValue(), tabou.getKey()))) { // old colonne, new colonne
+                    Mouvement tabou = new Mouvement(xnum.get(ligne), colonne);
+                    if (tabous.contains(tabou)) {
                         // Tabou, on ne fait pas l'interversion des colonnes
-                        
                         if (verbose) {
-                            System.out.println("Tabou rencontré : " + tabou.getKey() + " - " + tabou.getValue());
+                            System.out.println("Tabou rencontré : " + tabou.toString());
                         }
                         
                         continue;
@@ -196,14 +215,14 @@ public class Tabou extends Optimisation
                     // Récupération de la ligne associée à la colonne choisie
                     int ligneIntervertible = n + 1;
                     for (int i = 0; i < n; i++) {
-                        if (voisin.get(i) == colonne) {
+                        if (xnum.get(i) == colonne) {
                             ligneIntervertible = i;
                             break;
                         }
                     }
 
                     // Interversion
-                    voisin.set(ligneIntervertible, oldColonne); // throws a NullPointerException if reines has not the colonne
+                    voisin.set(ligneIntervertible, xnum.get(ligne)); // throws a NullPointerException if reines has not the colonne
                     voisin.set(ligne, colonne);
 
                     // Ajout dans la liste de voisins
@@ -222,82 +241,35 @@ public class Tabou extends Optimisation
 
         return voisins;
     }
+    
+    /**
+     * Génération aléatoire d'un voisin
+     * @return Un voisin aléatoire
+     */
+    private Map<Mouvement, List<Integer>> genererVoisinsAleatoires() {
+        Random rand = new Random();
+        Map<Mouvement, List<Integer>> voisins = new HashMap();
+        
+        while (voisins.size() < nechantillon) { // Peut tourner à l'infini si la liste tabou est trop grande
+            int ligne1 = rand.nextInt(n);
+            int ligne2;
+            do {
+                ligne2 = rand.nextInt(n);
+            } while (ligne2 == ligne1);
+            
+            // Exclusion des tabous
+            Mouvement echange = new Mouvement(xnum.get(ligne1), xnum.get(ligne2));
+            if (tabous.contains(echange) || voisins.containsKey(echange)) {
+                continue;
+            }
 
-    @Override
-    public List<List<Integer>> calculerVoisins(List<Integer> reines) {
-//        int nbVoisins = 0;
-        List<List<Integer>> voisins = new ArrayList();
-//
-//        // Pour chaque ligne
-//        for (int ligne = 0; ligne < n; ligne++) {
-//            for (int colonne = 0; colonne < n; colonne++) {
-//                List<Integer> voisin = new ArrayList(reines);
-//                if (reines.get(ligne) != colonne) {
-//                    // Exclusion des tabous
-//                    if (tabous.contains(new Pair(voisin.get(ligne), colonne))) {
-//                        // Tabou, on ne fait pas l'interversion des colonnes
-//                        continue;
-//                    }
-//                    
-//                    // Récupération de la ligne associée à la colonne choisie
-//                    int ligneIntervertible = n + 1;
-//                    for (int i = 0; i < n; i++) {
-//                        if (voisin.get(i) == colonne) {
-//                            ligneIntervertible = i;
-//                            break;
-//                        }
-//                    }
-//
-//                    // Interversion
-//                    voisin.set(ligneIntervertible, voisin.get(ligne)); // throws a NullPointerException if reines has not the colonne
-//                    voisin.set(ligne, colonne);
-//
-//                    // Ajout dans la liste de voisins
-//                    if (voisins.contains(voisin)) { // Eviter les doublons
-//                        continue;
-//                    }
-//                    voisins.add(voisin);
-//                    nbVoisins++;
-//                }
-//            }
-//        }
-//        
-//        if (verbose) {
-//            System.out.println("Nb voisins trouvés : " + nbVoisins);
-//        }
-//
+            List<Integer> random = new ArrayList(xnum);
+            random.set(ligne1, xnum.get(ligne2));
+            random.set(ligne2, xnum.get(ligne1));
+
+            voisins.put(echange, random);
+        }
+        
         return voisins;
-    }
-
-//    private List<List<Integer>> voisinsAleatoires(List<List<Integer>> C) {
-//        Random rand = new Random();
-//        List<List<Integer>> echantillon = new ArrayList(C);
-//        int max = C.size();
-//        
-//        while (echantillon.size() < nechantillon && echantillon.size() < max) {
-//            echantillon.remove(C.get(rand.nextInt(echantillon.size())));
-//        }
-//        
-//        if (verbose) {
-//            System.out.println("Echantillon de taille " + echantillon.size());
-//        }
-//
-//        return echantillon;
-//    }
-//    
-//        private Map<Pair<Integer, Integer>, List<Integer>> voisinsAleatoires(Map<Pair<Integer, Integer>, List<Integer>> C) {
-//        Random rand = new Random();
-//        Map<Pair<Integer, Integer>, List<Integer>>  echantillon = new HashMap(C);
-//        int max = C.size();
-//        
-//        while (echantillon.size() < nechantillon && echantillon.size() < max) {
-//            echantillon.remove(C.keySet()..get(rand.nextInt(echantillon.size())));
-//        }
-//        
-//        if (verbose) {
-//            System.out.println("Echantillon de taille " + echantillon.size());
-//        }
-//
-//        return echantillon;
-//    }
+    }   
 }

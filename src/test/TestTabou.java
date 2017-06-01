@@ -11,14 +11,9 @@ import algo.Tabou;
 
 public class TestTabou {
     public static void main(String[] args){
-        int tailleEquichier = 8;
-        int decalageVoisinnage = 1;
-        int directionVoisinnage = 1; // Correspond aux 8 directions environnantes
-        int typeInitialisation = 2; // Initialisation opti = 1 ; Initialisation random = 2 ;
-        
-        Optimisation opti = new Tabou(200, 100000);
+        Optimisation opti = new Tabou(20, 100000, true);
         //Optimisation opti = new Tabou(500, 100000); // Itérations = 2, durée = 68 minutes, conflits > 600
-//        opti.setVerbose(true);
+        opti.setVerbose(true);
         opti.run(2);
     }
 }

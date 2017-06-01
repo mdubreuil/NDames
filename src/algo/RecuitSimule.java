@@ -12,7 +12,7 @@ import java.util.Random;
  */
 public class RecuitSimule extends Optimisation
 {
-    // n1=2*n, n2=2*n, temp0=0.3*n et gamma=0.1 
+    // Tester avec : n1 = 2 * n, n2 = 2 * n, temp0 = 0.3 * n et gamma = 0.1 
     
     /**
      * Nombre de fois que l'on change de température
@@ -118,34 +118,17 @@ public class RecuitSimule extends Optimisation
         System.out.println("Température finale : " + temperature);
         System.out.println("Nb conflits total : " + fmin);
     }
-    
+
+    protected List<List<Integer>> calculerVoisins(List<Integer> reines) {
+        return this.transformationEchange(reines);
+    }
+
     /**
-     * Transformation locale par échange de 2 reines
-     * @param echiquier
-     * @param ligne Ligne de la reine à inverser
-     * @param colonne Colonne de la reine à inverser
-     * @return Echiquier avec 2 reines inversées
+     * Transformation locale : échange de 2 reines
+     * @param reines
+     * @return Liste de voisins
      */
-//    public List<Integer> transformation(List<Integer> echiquier, int ligne, int colonne) // TODO permettre plus de paramètrage, déplacer dans optimisation
-//    {
-//        // Récupération de la ligne associée à la colonne choisie
-//        int ligneIntervertible = n + 1;
-//        for (int i = 0; i < n; i++) {
-//            if (echiquier.get(i) == colonne) {
-//                ligneIntervertible = i;
-//                break;
-//            }
-//        }
-//
-//        // Interversion
-//        echiquier.set(ligneIntervertible, echiquier.get(ligne)); // throws a NullPointerException if reines has not the colonne
-//        echiquier.set(ligne, colonne);
-//        
-//        return echiquier;
-//    }
-//
-//    @Override
-    public List<List<Integer>> transformationEchange(List<Integer> reines) {
+    private List<List<Integer>> transformationEchange(List<Integer> reines) {
         int nbVoisins = 0;
         List<List<Integer>> voisins = new ArrayList();
 
@@ -184,14 +167,12 @@ public class RecuitSimule extends Optimisation
         }
 
         return voisins;
-    }    
-
-    @Override
-    List<List<Integer>> calculerVoisins(List<Integer> reines) {
-        return this.transformationEchange(reines);
-//        return this.transformationInsertionDecalage(reines);
     }
-
+    
+    /**
+     * Génération aléatoire d'un voisin
+     * @return Un voisin aléatoire
+     */
     private List<Integer> genererVoisinAleatoire() {
         Random rand = new Random();
         int ligne1 = rand.nextInt(n);
@@ -205,48 +186,5 @@ public class RecuitSimule extends Optimisation
         random.set(ligne2, xnum.get(ligne1));
         
         return random;
-    }
-    
-    ///// Transformation par insertion-décalage
-    public List<List<Integer>> transformationInsertionDecalage(List<Integer> reines) {
-        int nbVoisins = 0;
-        List<List<Integer>> voisins = new ArrayList();
-
-        // Pour chaque reine
-        for (int ligne = 0; ligne < n; ligne++) {
-            int colonne = reines.get(ligne);
-
-            // On la déplace à index si index différent de colonne
-            for (int index = 0; index < n; index++) {
-
-                if (index != colonne) {
-                    System.out.println("reine " + colonne);
-                    System.out.println("décalée à " + index);
-                    
-                    List<Integer> voisin = new ArrayList(reines);
-                    voisin.remove(ligne);
-                    
-                    
-                    if (index > voisin.size()) {
-                        voisin.add(colonne);
-                    } else {
-                        voisin.add(index, colonne);
-                    }
-                    
-                    afficherEchiquier(voisin);
-                    if (!voisins.contains(voisin)) {
-                        voisins.add(voisin);
-                    }
-                }
-            }
-            
-            
-        }
-
-        if (verbose) {
-            System.out.println("Nb voisins trouvés : " + nbVoisins);
-        }
-
-        return voisins;
     }
 }
