@@ -12,10 +12,17 @@ import java.util.Random;
  */
 public class RecuitSimule extends Optimisation
 {
+    // n1=2*n, n2=2*n, temp0=0.3*n et gamma=0.1 
+    
+    /**
+     * Nombre de fois que l'on change de température
+     */
+    protected int n1;
+    
     /**
      * Nombre de déplacements pour une température donnée
      */
-    protected int deplacement = 10;
+    protected int n2;
     
     /**
      * Coefficient pour déterminer la temperature à l'étape i
@@ -29,10 +36,15 @@ public class RecuitSimule extends Optimisation
 
     public RecuitSimule(int n, int nmax) {
         super(n, nmax);
+        this.n1 = 2 * n;
+        this.n2 = 2 * n;
+        this.temperature = 0.3 * n;
+        this.coefficient = 0.1;
+        
         System.out.println("Recuit simulé - " + n);
     }
     
-    public RecuitSimule(int n, int nmax, int temperature, double coefficient) {
+    public RecuitSimule(int n, int nmax, double temperature, double coefficient) {
         this(n, nmax);
         
         if (temperature == 0 || coefficient == 0) {
@@ -43,9 +55,10 @@ public class RecuitSimule extends Optimisation
         this.coefficient = coefficient;
     }
     
-    public RecuitSimule(int n, int nmax, int temperature, double coefficient, int deplacement) {
+    public RecuitSimule(int n, int nmax, double temperature, double coefficient, int n1, int n2) {
         this(n, nmax, temperature, coefficient);
-        this.deplacement = deplacement;
+        this.n1 = n1;
+        this.n2 = n2;
     }
 
     @Override
@@ -54,48 +67,45 @@ public class RecuitSimule extends Optimisation
         // Affichage état initial
         System.out.println("Température initiale: " + temperature);
         System.out.println("Coefficient: " + coefficient);
-        System.out.println("Déplacement pour une température donnée: " + deplacement);
+        System.out.println("Changement de température: " + n1);
+        System.out.println("Déplacement pour une température donnée: " + n2);
         
         // Initialisation
         this.initialisation();
         Random rand = new Random();
         
         // Lancement algorithme
-        while (num < nmax && fmin > 0) {
-            for (int l = 0; l < deplacement; l++) {
-                
-                // Calcul des voisins
-                List<List<Integer>> V = calculerVoisins(xnum);
+        while (/*num < nmax && */fmin > 0) {
+            for (int k = 0; k < n1; k++) {
+                for (int l = 0; l < n2; l++) {
+                    /// Choix d'un voisin au hasard
+                    List<Integer> voisin = genererVoisinAleatoire();
+                    int fitnessVoisin = fitness(voisin);
+                    int deltaFitness = fitnessVoisin - fnum;
 
-                /// Choix d'un voisin au hasard
-                List<Integer> voisin = V.get(rand.nextInt(V.size()));
-
-                // Réfléchir sur ce code...
-                int fitnessVoisin = fitness(voisin);
-                int deltaFitness = fitnessVoisin - fnum;
-                
-                if (deltaFitness <= 0) {
-                    if (fitnessVoisin < fmin) {
-                        fmin = fitnessVoisin;
-                        xmin = voisin;
-                    }
-                    xnum = new ArrayList(voisin);
-                    fnum = fitnessVoisin;
-                } else {
-                    double p = rand.nextInt(1);
-                    double facteur = Math.exp(-deltaFitness/temperature);
-                    
-                    if (p <= facteur) {
-                        xnum = new ArrayList(voisin);
+                    if (deltaFitness <= 0) {
+                        xnum = voisin;
                         fnum = fitnessVoisin;
+                        if (fnum < fmin) {
+                            fmin = fnum;
+                            xmin = new ArrayList(xnum);
+                        }
+                    } else {
+                        double p = rand.nextInt(1);
+                        double facteur = Math.exp(-deltaFitness/temperature);
+
+                        if (p <= facteur) {
+                            xnum = voisin;
+                            fnum = fitnessVoisin;
+                        }
+                        // sinon, on ne change pas de solution courante, on choisira juste un autre voisin
                     }
-                    // sinon, on ne change pas de solution courante, on choisira juste un autre voisin
+
+                    num++;
                 }
-                
-                num++;
+
+                temperature *= coefficient;
             }
-            
-            temperature *= coefficient;
         }
 
         // Affichage
@@ -174,8 +184,29 @@ public class RecuitSimule extends Optimisation
         }
 
         return voisins;
+    }    
+
+    @Override
+    List<List<Integer>> calculerVoisins(List<Integer> reines) {
+        return this.transformationEchange(reines);
+//        return this.transformationInsertionDecalage(reines);
     }
 
+    private List<Integer> genererVoisinAleatoire() {
+        Random rand = new Random();
+        int ligne1 = rand.nextInt(n);
+        int ligne2;
+        do {
+            ligne2 = rand.nextInt(n);
+        } while (ligne2 == ligne1);
+        
+        List<Integer> random = new ArrayList(xnum);
+        random.set(ligne1, xnum.get(ligne2));
+        random.set(ligne2, xnum.get(ligne1));
+        
+        return random;
+    }
+    
     ///// Transformation par insertion-décalage
     public List<List<Integer>> transformationInsertionDecalage(List<Integer> reines) {
         int nbVoisins = 0;
@@ -217,11 +248,5 @@ public class RecuitSimule extends Optimisation
         }
 
         return voisins;
-    }
-
-    @Override
-    List<List<Integer>> calculerVoisins(List<Integer> reines) {
-//        return this.transformationEchange(reines);
-        return this.transformationInsertionDecalage(reines);
     }
 }

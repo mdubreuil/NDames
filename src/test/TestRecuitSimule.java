@@ -10,10 +10,12 @@ import algo.RecuitSimule;
  */
 
 public class TestRecuitSimule {
-    public static void main(String [] args){
-
-        Optimisation opti = new RecuitSimule(5, 1000000, 10, 0.5, 15);
-        opti.setVerbose(true);
+    public static void main(String [] args) {
+        
+        int n = 100;
+        int nmax = (n * 2) * (n * 2);
+        Optimisation opti = new RecuitSimule(n, 1000000000);
+//        opti.setVerbose(true);
         opti.run(2);
     }
 }
