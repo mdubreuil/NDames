@@ -16,6 +16,6 @@ public class TestRecuitSimule {
         int nmax = (n * 2) * (n * 2);
         Optimisation opti = new RecuitSimule(n, 1000000000);
 //        opti.setVerbose(true);
-        opti.run(2);
+        opti.run();
     }
 }

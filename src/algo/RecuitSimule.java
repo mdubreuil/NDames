@@ -1,6 +1,7 @@
 
 package algo;
 
+import algo.util.Echiquier;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -13,7 +14,7 @@ import java.util.Random;
 public class RecuitSimule extends Optimisation
 {
     // Tester avec : n1 = 2 * n, n2 = 2 * n, temp0 = 0.3 * n et gamma = 0.1 
-    
+
     /**
      * Nombre de fois que l'on change de température
      */
@@ -62,7 +63,7 @@ public class RecuitSimule extends Optimisation
     }
 
     @Override
-    public void run(int nbIteration)
+    public void run()
     {
         // Affichage état initial
         System.out.println("Température initiale: " + temperature);
@@ -80,7 +81,7 @@ public class RecuitSimule extends Optimisation
                 for (int l = 0; l < n2; l++) {
                     /// Choix d'un voisin au hasard
                     List<Integer> voisin = genererVoisinAleatoire();
-                    int fitnessVoisin = fitness(voisin);
+                    int fitnessVoisin = Echiquier.fitness(voisin);
                     int deltaFitness = fitnessVoisin - fnum;
 
                     if (deltaFitness <= 0) {
@@ -111,7 +112,7 @@ public class RecuitSimule extends Optimisation
         // Affichage
         if (verbose) {
             System.out.println("Solution finale");
-            afficherEchiquier(xmin);
+            Echiquier.afficherEchiquier(xmin);
         }
 
         System.out.println("Nombre d'itérations : " + num);

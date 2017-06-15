@@ -1,15 +1,15 @@
 package algo;
 
+import algo.util.Echiquier;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 /**
  *
  * @author Mélanie DUBREUIL, Ophélie EOUZAN - POLYTECH LYON - 4APP
  * 
  */
-public abstract class Optimisation {
+public abstract class Optimisation implements IAlgorithme {
 
     /**
      * Taille de l'échiquier
@@ -64,100 +64,22 @@ public abstract class Optimisation {
         this.verbose = verbose;
     }
 
-    public abstract void run(int nbIteration);
+    @Override
+    public abstract void run();
 
     protected void initialisation() {
         System.out.println("Stratégie d'initialisation: Random");
 
-        xnum = initialisationRandom(); // TODO autres types d'initialisation
+        xnum = Echiquier.initialisationRandom(n); // TODO autres types d'initialisation
         xmin = new ArrayList(xnum);
-        fnum = fmin = fitness(xmin);
+        fnum = fmin = Echiquier.fitness(xmin);
         if (verbose) {
             System.out.println();
             System.out.println("Solution initiale");
-            afficherEchiquier(xnum);
+            Echiquier.afficherEchiquier(xnum);
         }
         System.out.println("Nb conflits initial: " + fnum);
         System.out.println();
-    }
-
-    
-    /**
-     * Calcul du nombre de conflits pour un plateau donné
-     * @param a
-     * @return 
-     */
-    protected int fitness(List<Integer> a) {
-        int f = 0;
-        for (int i = 0; i < n; i++){
-            for (int j = i+1; j < n; j++){
-                if (Math.abs(i - j) == Math.abs(a.get(i) - a.get(j)))
-                    f++;
-            }
-        }
-        return f;
-    }
-    
-    /**
-     * Affichage de l'échiquier
-     * @param reines 
-     */
-    protected void afficherEchiquier(List<Integer> reines) {
-        // Generate border
-        String trait = "    ";
-        for (int i = 0; i < n; i++) {
-            trait += "----";
-        }
-
-        // Display
-        System.out.println(trait);
-        for (int ligne = 0; ligne < n; ligne++) {
-            System.out.print(ligne + ": |");
-            for (int colonne = 0; colonne < n; colonne++) {
-                if (colonne == reines.get(ligne)) {
-                    System.out.print("_X_|");
-                } else {
-                    System.out.print("___|");
-                }
-            }
-            System.out.println("\n" + trait);
-        }
-    }
-    
-    /**
-     * Initialisation random (optimisée)
-     * @return 
-     */
-    private List<Integer> initialisationRandom() {
-        Random rand = new Random();
-        List<Integer> reines = new ArrayList();
-        List<Integer> indicesUsed = new ArrayList();
-        for (int i = 0; i < n; i++) {
-            int randomValue;
-            do {
-                randomValue = rand.nextInt(n);
-            } while (indicesUsed.contains(randomValue));
-
-            reines.add(randomValue);
-            indicesUsed.add(randomValue);
-        }
-        
-        return reines;
-    }
-    
-    /**
-     * Initialisation optimisée
-     * @return 
-     */
-    private List<Integer> initialisationOptimisee() {
-        // TODO
-        List<Integer> reines = new ArrayList();
-        int j = 0;
-        for (int i = 0; i < n; i++) {
-            reines.add(i, i % 3 + j); // ???
-        }
-        
-        return reines;
     }
 
     /**

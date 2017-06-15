@@ -14,6 +14,6 @@ public class TestTabou {
         Optimisation opti = new Tabou(20, 100000, true);
         //Optimisation opti = new Tabou(500, 100000); // Itérations = 2, durée = 68 minutes, conflits > 600
         opti.setVerbose(true);
-        opti.run(2);
+        opti.run();
     }
 }

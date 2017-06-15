@@ -1,5 +1,6 @@
 package algo;
 
+import algo.util.Echiquier;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -96,7 +97,7 @@ public class Tabou extends Optimisation
     }
 
     @Override
-    public void run(int nbIteration)
+    public void run()
     {
         // Affichage état initial
         System.out.println("Taille de la liste tabou: " + nT);
@@ -128,7 +129,7 @@ public class Tabou extends Optimisation
                 List<Integer> bestVoisin = null;
                 Mouvement tabou = null;
                 for (Map.Entry<Mouvement, List<Integer>> voisin : C.entrySet()) {
-                    int fitnessVoisin = fitness(voisin.getValue());
+                    int fitnessVoisin = Echiquier.fitness(voisin.getValue());
                     if (fitnessMin < 0 || fitnessVoisin < fitnessMin) {
                         fitnessMin = fitnessVoisin;
                         bestVoisin = voisin.getValue();
@@ -164,7 +165,7 @@ public class Tabou extends Optimisation
         // Affichage
         if (verbose) {
             System.out.println("Solution finale");
-            afficherEchiquier(xmin);
+            Echiquier.afficherEchiquier(xmin);
         }
         
         System.out.println("Nombre d'itérations : " + num);
