@@ -138,19 +138,8 @@ public class RecuitSimule extends Optimisation
             for (int colonne = 0; colonne < n; colonne++) {
                 List<Integer> voisin = new ArrayList(reines);
                 if (reines.get(ligne) != colonne) {
-                    
-                    // Transformation locale par échange de 2 reines sur leur colonne
-                    // Récupération de la ligne associée à la colonne choisie
-                    int ligneIntervertible = n + 1;
-                    for (int i = 0; i < n; i++) {
-                        if (voisin.get(i) == colonne) {
-                            ligneIntervertible = i;
-                            break;
-                        }
-                    }
-
                     // Interversion
-                    voisin.set(ligneIntervertible, voisin.get(ligne)); // throws a NullPointerException if reines has not the colonne
+                    voisin.set(voisin.indexOf(colonne), voisin.get(ligne)); // throws a NullPointerException if reines has not the colonne
                     voisin.set(ligne, colonne);
 
                     // Ajout dans la liste de voisins

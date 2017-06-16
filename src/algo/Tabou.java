@@ -69,7 +69,7 @@ public class Tabou extends Optimisation
     /**
      * Si stochastique, taille de l'échantillon des voisins aléatoires à sélectionner
      */
-    protected int nechantillon = 10;
+    protected int nechantillon = 50;
 
     /**
      * Liste des solutions tabous
@@ -88,7 +88,12 @@ public class Tabou extends Optimisation
     
     public Tabou (int n, int nmax, boolean stochastique) {
         this(n, nmax);
-        this.stochastique = stochastique;
+        
+        if (stochastique || n > 150) {
+            this.stochastique = true;
+        } else {
+            this.stochastique = false;
+        }
     }
     
     public Tabou (int n, int nmax, boolean stochastique, int nechantillon) {
@@ -212,18 +217,9 @@ public class Tabou extends Optimisation
                         
                         continue;
                     }
-                    
-                    // Récupération de la ligne associée à la colonne choisie
-                    int ligneIntervertible = n + 1;
-                    for (int i = 0; i < n; i++) {
-                        if (xnum.get(i) == colonne) {
-                            ligneIntervertible = i;
-                            break;
-                        }
-                    }
-
+  
                     // Interversion
-                    voisin.set(ligneIntervertible, xnum.get(ligne)); // throws a NullPointerException if reines has not the colonne
+                    voisin.set(xnum.indexOf(colonne), xnum.get(ligne)); // throws a NullPointerException if reines has not the colonne
                     voisin.set(ligne, colonne);
 
                     // Ajout dans la liste de voisins
@@ -264,13 +260,38 @@ public class Tabou extends Optimisation
                 continue;
             }
 
-            List<Integer> random = new ArrayList(xnum);
-            random.set(ligne1, xnum.get(ligne2));
-            random.set(ligne2, xnum.get(ligne1));
+            List<Integer> voisinRandom = new ArrayList(xnum);
+            voisinRandom.set(ligne1, xnum.get(ligne2));
+            voisinRandom.set(ligne2, xnum.get(ligne1));
 
-            voisins.put(echange, random);
+            voisins.put(echange, voisinRandom);
         }
         
         return voisins;
-    }   
+    }
+
+    /**
+     * Indique si la génération de voisins doit être aléatoire ou non
+     * Si aléatoire, taille de l'échantillon inférieur à n
+     * @param stochastique 
+     */
+    public void setStochastique(boolean stochastique) {
+        this.stochastique = stochastique;
+    }
+
+    /**
+     * Taille de l'échantillon généré aléatoirement dans un environnement stochastique
+     * @param nechantillon 
+     */
+    public void setNechantillon(int nechantillon) {
+        this.nechantillon = nechantillon;
+    }
+
+    /**
+     * Taille de la liste Tabou
+     * @param nT 
+     */
+    public void setnT(int nT) {
+        this.nT = nT;
+    }
 }
