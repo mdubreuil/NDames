@@ -12,7 +12,7 @@ import algo.Optimisation;
 public class TestGenetique {
     public static void main(String[] args){
         Optimisation opti = new Genetique(8, 100);
-        opti.setVerbose(false);
+        opti.setVerbose(true);
         opti.run();
     }
 }

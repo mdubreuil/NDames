@@ -18,6 +18,8 @@ public class Genetique extends Optimisation {
     private Generation population = new Generation();
     private Chromosome xMin;
     private Option optionReproduction = Option.RoueBiaiseeOption1;
+    private double probaMutation = 0.2;
+    private Random rand = new Random();
     
     private enum Option {
         RoueBiaiseeOption1,
@@ -28,6 +30,8 @@ public class Genetique extends Optimisation {
         private List<Chromosome> individus = new ArrayList();
         private int fitnessTotale = 0;
         private Random rand = new Random();
+        private int fmin = -1; // fitness min
+        private Chromosome xmin; // xmin
         
         public Generation() {}
         
@@ -43,17 +47,27 @@ public class Genetique extends Optimisation {
             return fitnessTotale;
         }
 
+        public int getFmin() {
+            return fmin;
+        }
+
+        public Chromosome getXmin() {
+            return xmin;
+        }
+
         public void add(Chromosome individu) {
             individus.add(individu);
             fitnessTotale += individu.getFitness();
+            setMin(individu);
         }
         
-        public void remove(Chromosome individu) {
-            //int fitness = individu.getFitness();
-            individus.remove(individu);
-            fitnessTotale -= individu.getFitness();
+        private void setMin(Chromosome individu) {
+            if (fmin < 0 || individu.getFitness() < fmin) {
+                fmin = individu.getFitness();
+                xmin = individu;
+            }
         }
-        
+
         public int size() {
             return individus.size();
         }
@@ -66,6 +80,7 @@ public class Genetique extends Optimisation {
             if (individu.getFitness() == 0) {
                 return 1.;
             }
+            //return (Double.valueOf(fitnessTotale) / Double.valueOf(individu.getFitness())) / Double.valueOf(fitnessTotale);
             return Double.valueOf((fitnessTotale - individu.getFitness())) / Double.valueOf(fitnessTotale);
         }
 
@@ -78,9 +93,11 @@ public class Genetique extends Optimisation {
                 @Override
                 public int compare(Chromosome chromosome1, Chromosome chromosome2) {
                     int compare = getProportion(chromosome1).compareTo(getProportion(chromosome2)); // Ordre decroissant de proportion : -
-                    
-                    if (reverse)
+
+                    if (reverse) {
                         return -compare;
+                    }
+
                     return compare;
                 }
             });
@@ -126,10 +143,7 @@ public class Genetique extends Optimisation {
             if (this.fitness != other.fitness) {
                 return false;
             }
-            if (!Objects.equals(this.echiquier, other.echiquier)) {
-                return false;
-            }
-            return true;
+            return Objects.equals(this.echiquier, other.echiquier);
         }
     }
 
@@ -145,23 +159,18 @@ public class Genetique extends Optimisation {
             System.out.println("Population initiale");
         }
 
-        int fitnessMin = -1;
         for (int i = 0; i < n; i++) {
             List<Integer> x = Echiquier.initialisationRandom(n);
             int fitnessX = Echiquier.fitness(x);
-            Chromosome individu = new Chromosome(x, fitnessX);
-            if (fitnessMin < 0 || fitnessX < fitnessMin) {
-                fitnessMin = fitnessX;
-                xMin = individu;
-            }
 
             population.add(new Chromosome(x, fitnessX));
 
-//            if (verbose) {
+            if (verbose) {
                 System.out.println("Fitness solution " + i + " : " + fitnessX);
-//            }
+            }
         }
-        fmin = fitnessMin;
+        fmin = population.getFmin();
+        xmin = population.getXmin().getEchiquier();
         
         System.out.println("Nb fitness totale: " + population.getFitnessTotale());
         System.out.println("Fitness min: " + fmin);
@@ -173,105 +182,165 @@ public class Genetique extends Optimisation {
         // Initialisation
         this.initialisation();
         
-//        while (fmin != 0 && num < nmax) {
+        while (fmin != 0 && num < 3) { // nmax
+            if (verbose) {
+                System.out.println("Itération " + num);
+                System.out.println();
+            }
+
             // Reproduction
             Generation newPopulation = this.reproduction(population);
             // Croisement
-            this.croisement(newPopulation);
+            newPopulation = this.croisement(newPopulation, false); // TODO attributs random
             // Mutation
+            newPopulation = this.mutation(newPopulation);
+            
+            // Affectations
+            population = newPopulation;
+            if (population.getFmin() < fmin) {
+                fmin = population.getFmin();
+                xmin = population.getXmin().getEchiquier();
+            }
+
+            // Affichage itération
+            if (verbose) {
+                System.out.println("Generation de taille " + population.size());
+                System.out.println("Nb fitness totale: " + population.getFitnessTotale());
+                System.out.println("Fitness min: " + fmin);
+                System.out.println();
+            }
             
             num++;
+        }
+        
+        if (verbose) {
+            System.out.println("Solution finale\n");
+            Echiquier.afficherEchiquier(xmin);
+            System.out.println("Fitness finale : " + fmin);
+        }
+            
 //        }
-        
-        
-        // 1. Génération de n solutions aléatoires : sans vérifier l'égalité
-        // 2. Reproduction : 
-        //      Calcul de la fitness de chaque solution
-        //      Attribuer à chaque solution un pourcentage : (somme des fitness - fitness)/somme des fitness totale
-        //      Sélection des solutions selon une roulette aléatoire lancé "option" fois selon
-        
-
-        
-        
+    }
+    
+    private double getRandom() {
+        Random random = new Random(rand.nextLong());
+        return Math.abs(random.nextGaussian());
     }
     
     private Generation reproduction(Generation population) {
+        System.out.println("Reproduction\n");
         Generation generation = new Generation();
-        Random rand = new Random();
         
         // Tri
+        //population.sort(true);
         population.sort(true);
-        
-        // TODO use option
-        int noption;
-        switch (optionReproduction) {
-            case RoueBiaiseeOption1 :
-                noption = 1;
-                break;
-            case RoueBiaiseeOption2 :
-                noption = population.size();
-                break;
-        }
 
-        
-        double maxRange = 1.;
+        int fitnessTotale = population.getFitnessTotale();
         for (int i = 0; i < population.size(); i++) {
-            
-            double random = rand.nextDouble();
             int indiceRetenu = 0;
-            System.out.println("Random = "+ random * population.getFitnessTotale());
+            //double maxRange = 1.;
+            double minRange = 0.;
+            double random = getRandom();
+            System.out.println("Random = " + random * fitnessTotale);
 
             for (Chromosome chromosome : population.getIndividus()) {
-                double minRange = maxRange - population.getProportion(chromosome);
+                //double minRange = maxRange - population.getProportion(chromosome);
+                double maxRange = minRange + population.getProportion(chromosome);
                 
                 if (verbose) {
-                    System.out.println("Max " + maxRange);
-                    System.out.println("Min " + minRange);
+//                    System.out.println("Max " + maxRange);
+//                    System.out.println("Min " + minRange);
+                    System.out.println("Range " + indiceRetenu + " : " + minRange * fitnessTotale + " - " + maxRange * fitnessTotale);
                     System.out.println("Fitness chromosome " + indiceRetenu + " : " + chromosome.getFitness());
-                    System.out.println("Proportion chromosome " + indiceRetenu + " : " + population.getProportion(chromosome));
+                    System.out.println("Proportion chromosome " + indiceRetenu + " : " + population.getProportion(chromosome) * fitnessTotale);
                 }
 
+                //if (random > minRange && random <= maxRange) {
                 if (random >= minRange && random < maxRange) {
                     generation.add(chromosome);
-                    System.out.println("Fitness chromosome retenu : " + chromosome.getFitness());
+                    //System.out.println("Fitness chromosome retenu : " + chromosome.getFitness());
+                    System.out.println("Chromosome retenu : " + indiceRetenu);
                     break;
                 }
 
-                maxRange = minRange;
+                //maxRange = minRange;
+                minRange = maxRange;
                 indiceRetenu++;
             }
-            
-            if (verbose) {
-                System.out.println("Chromosome retenu : " + indiceRetenu);
-            }
+            System.out.println();
         }
-        
+
         return generation;
     }
     
-    private Generation croisement(Generation population) {
-        
+    private Generation croisement(Generation population, boolean random) {
+        System.out.println("Croisement\n");
         Generation generation = new Generation();
-        Chromosome c1, c2;
-        for (int i = 0; i < population.size(); i = i + 2) {
-            
-            // Aléatoire
-//            c1 = population.getRandomIndividu();
-//            c2 = population.getRandomIndividu();
-            
-            // 2 à 2
-            c1 = population.getIndividus().get(i);
-            c2 = population.getIndividus().get(i+1);
-            
+
+        for (int i = 0; i < population.size() - 1; i = i + 2) {
+            if (verbose) {
+                System.out.println("Croisement des individus " + i + " et " + (i+1));
+            }
+
+            Chromosome c1, c2;
+            if (random) {
+                // Aléatoire
+                c1 = population.getRandomIndividu();
+                c2 = population.getRandomIndividu();
+            } else {
+                // 2 à 2
+                c1 = population.getIndividus().get(i);
+                c2 = population.getIndividus().get(i+1);
+            }
+
             croisement(generation, c1, c2);
         }
         
-        
         return generation;
     }
     
-    private void mutation(Generation population) {
+    private Generation mutation(Generation population) {
+        System.out.println("Mutation\n");
+        Generation generation = new Generation();
         
+        int i = 0;
+        for (Chromosome individu : population.getIndividus()) {
+            System.out.println("Mutation chromosome " + i + " de fitness " + individu.getFitness());
+            generation.add(mutation(individu));
+            i++;
+        }
+
+        return generation;
+    }
+    
+    private Chromosome mutation(Chromosome individu) {
+        List<Integer> echiquier = new ArrayList(individu.getEchiquier());
+        
+        Random rand = new Random();
+        for (int i = 0; i < echiquier.size(); i++) {
+            if (rand.nextDouble() < probaMutation) { // mutation
+                int ligne = rand.nextInt(echiquier.size());
+                
+                if (ligne != i) { // échange de i et ligne
+                    if (verbose) {
+                        System.out.println("Mutation de " + i + " et " + ligne);
+                    }
+
+                    echiquier.set(i, individu.getEchiquier().get(ligne));
+                    echiquier.set(ligne, individu.getEchiquier().get(i));
+                }
+            } else {
+                System.out.println("Pas de mutation");
+            }
+        }
+        
+        int nouvelleFitness = Echiquier.fitness(echiquier);
+        if (verbose) {
+            System.out.println("Nouvelle fitness " + nouvelleFitness);
+            System.out.println();
+        }
+
+        return new Chromosome(echiquier, nouvelleFitness);
     }
     
     /**
@@ -283,52 +352,63 @@ public class Genetique extends Optimisation {
      */
     private void croisement(Generation generation, Chromosome chromosome1, Chromosome chromosome2) {
 
-        System.out.println("Croisement");
-        System.out.println("affichage echiquiers avant croisements");
-        System.out.println("echiquie1");
-        Echiquier.afficherEchiquier(chromosome1.getEchiquier());
-        System.out.println("echiquier2");
-        Echiquier.afficherEchiquier(chromosome2.getEchiquier());
-        
         if (chromosome1 == chromosome2) { // TODO clone si croisement aléatoire (!= 2 à 2)
-            System.out.println("Chromosomes identiques");
+            if (verbose) {
+                System.out.println("Chromosomes identiques\n");
+            }
+
             generation.add(chromosome1);
             generation.add(chromosome2);
             return;
         }
-        
-        // 1 croisement
-        Random rand = new Random();
-        int size = chromosome1.getEchiquier().size();
-        int indexCroisement = rand.nextInt(size);
-        System.out.println("croisement en " + indexCroisement);
 
-        // Echantillon
+        if (verbose) {
+            System.out.println("Affichage echiquiers avant croisements");
+            System.out.println("Echiquie 1");
+            Echiquier.afficherEchiquier(chromosome1.getEchiquier());
+            System.out.println("Echiquier 2");
+            Echiquier.afficherEchiquier(chromosome2.getEchiquier());
+        }
+
+        // 1 croisement
+        int indexCroisement = rand.nextInt(n);
+        if (verbose) {
+            System.out.println("Croisement en " + indexCroisement);
+        }
+
+        // Echantillons
         List<Integer> echiquier1 = new ArrayList(chromosome1.getEchiquier());
         List<Integer> echiquier2 = new ArrayList(chromosome2.getEchiquier());
-        List<Integer> croisement1 = new ArrayList(echiquier1.subList(indexCroisement, size - 1));
-        List<Integer> croisement2 = new ArrayList(echiquier2.subList(indexCroisement, size - 1));
+        
+        // Sous-échantillons
+        List<Integer> croisement1 = new ArrayList(echiquier1.subList(indexCroisement, n));
+        List<Integer> croisement2 = new ArrayList(echiquier2.subList(indexCroisement, n));
         
         // Croisement
-        echiquier1.subList(indexCroisement, size - 1).clear();
-        echiquier2.subList(indexCroisement, size - 1).clear();
+        echiquier1.subList(indexCroisement, n).clear();
+        echiquier2.subList(indexCroisement, n).clear();
         echiquier1.addAll(croisement2);
         echiquier2.addAll(croisement1);
+        
+        int nouvelleFintess1 = Echiquier.fitness(echiquier1);
+        int nouvelleFintess2 = Echiquier.fitness(echiquier2);
 
-        
-        System.out.println("affichage echiquiers après croisements");
-        System.out.println("echiquier1");
-        Echiquier.afficherEchiquier(echiquier1);
-        System.out.println("echiquier2");
-        Echiquier.afficherEchiquier(echiquier2);
-        System.out.println();
-        
-        System.out.println("affichage chromosomes après croisements");
-        Echiquier.afficherEchiquier(chromosome1.getEchiquier());
-        Echiquier.afficherEchiquier(chromosome2.getEchiquier());
-        
-        generation.add(new Chromosome(echiquier1, Echiquier.fitness(echiquier1)));
-        generation.add(new Chromosome(echiquier2, Echiquier.fitness(echiquier2)));
+        // Affichage
+        if (verbose) {
+            System.out.println("Affichage echiquiers après croisements");
+            System.out.println("Echiquier 1");
+            Echiquier.afficherEchiquier(echiquier1);
+            System.out.println("Echiquier 2");
+            Echiquier.afficherEchiquier(echiquier2);
+            
+            System.out.println("Nouvelle fitness echiquier 1 : " + nouvelleFintess1);
+            System.out.println("Nouvelle fitness echiquier 2 : " + nouvelleFintess2);
+            System.out.println();
+        }
+
+        // Ajout des chromosomes générés à la population
+        generation.add(new Chromosome(echiquier1, nouvelleFintess1));
+        generation.add(new Chromosome(echiquier2, nouvelleFintess2));
     }
 }
 
